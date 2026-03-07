@@ -1,7 +1,6 @@
 import axios from 'axios'
 
 // ─── Configure base URL ────────────────────────────────────────────────────
-// Change this to match your backend URL
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const api = axios.create({
@@ -12,7 +11,6 @@ const api = axios.create({
 })
 
 // ─── Request Interceptor ──────────────────────────────────────────────────
-// Automatically attach JWT token to every outgoing request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -25,7 +23,6 @@ api.interceptors.request.use(
 )
 
 // ─── Response Interceptor ─────────────────────────────────────────────────
-// Handle 401 globally — clear token and redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -41,7 +38,6 @@ api.interceptors.response.use(
 // ─── Auth Endpoints ───────────────────────────────────────────────────────
 export const authService = {
   login: (credentials) => {
-    // OAuth2PasswordRequestForm expects x-www-form-urlencoded
     const params = new URLSearchParams()
     params.append('username', credentials.username)
     params.append('password', credentials.password)
@@ -57,16 +53,56 @@ export const authService = {
 
 // ─── Products Endpoints ──────────────────────────────────────────────────
 export const productsService = {
-  getAll:  ()           => api.get('/products'),
+  getAll:  (params)     => api.get('/products/', { params }),
   getById: (id)         => api.get(`/products/${id}`),
-  create:  (data)       => api.post('/products', data),
+  create:  (data)       => api.post('/products/', data),
   update:  (id, data)   => api.put(`/products/${id}`, data),
   delete:  (id)         => api.delete(`/products/${id}`),
 }
 
+// ─── Categories Endpoints ────────────────────────────────────────────────
+export const categoriesService = {
+  getAll:  ()           => api.get('/categories/'),
+  getById: (id)         => api.get(`/categories/${id}`),
+  create:  (data)       => api.post('/categories/', data),
+  update:  (id, data)   => api.put(`/categories/${id}`, data),
+  delete:  (id)         => api.delete(`/categories/${id}`),
+}
+
+// ─── Customers Endpoints ─────────────────────────────────────────────────
+export const customersService = {
+  getAll:  ()           => api.get('/customers/'),
+  getById: (id)         => api.get(`/customers/${id}`),
+  create:  (data)       => api.post('/customers/', data),
+  update:  (id, data)   => api.put(`/customers/${id}`, data),
+  delete:  (id)         => api.delete(`/customers/${id}`),
+}
+
+// ─── Sales Endpoints ─────────────────────────────────────────────────────
+export const salesService = {
+  getAll:  ()           => api.get('/sales/'),
+  create:  (data)       => api.post('/sales/', data),
+}
+
+// ─── Reports Endpoints ───────────────────────────────────────────────────
+export const reportsService = {
+  getSales: (params)    => api.get('/reports/sales/', { params }),
+  getStock: ()          => api.get('/reports/stock/'),
+  getTopProducts: (limit = 10) => api.get('/reports/top-products/', { params: { limit } }),
+}
+
+// ─── Stock & Alerts Endpoints ───────────────────────────────────────────
+export const stockService = {
+  getHistory: ()        => api.get('/stock/history/'),
+  createMovement: (data) => api.post('/stock/movement/', data),
+}
+
+export const alertsService = {
+  getLowStock: ()       => api.get('/alerts/low-stock/'),
+}
+
 /**
  * Safely extracts a string error message from an API error response.
- * Handles FastAPI/Pydantic validation errors (422) which return 'detail' as an array of objects.
  */
 export const getErrorMessage = (err, defaultMsg = 'Something went wrong.') => {
   if (!err) return defaultMsg
@@ -74,14 +110,11 @@ export const getErrorMessage = (err, defaultMsg = 'Something went wrong.') => {
   const data = err.response?.data
   if (!data) return err.message || defaultMsg
 
-  // 1. Check for 'message' field
   if (typeof data.message === 'string') return data.message
 
-  // 2. Check for 'detail' field
   if (data.detail) {
     if (typeof data.detail === 'string') return data.detail
     if (Array.isArray(data.detail) && data.detail.length > 0) {
-      // For Pydantic errors, return the first one's message
       const firstError = data.detail[0]
       if (typeof firstError === 'string') return firstError
       if (firstError.msg) return firstError.msg

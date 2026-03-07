@@ -13,9 +13,10 @@ class Product(Base):
     stock = Column(Integer, nullable=False, default=0)
     min_stock = Column(Integer, nullable=False, default=0)
     barcode = Column(String, unique=True, index=True)
-    category = Column(String)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User")
+    category_relation = relationship("Category", back_populates="products")
     movements = relationship("StockMovement", back_populates="product")

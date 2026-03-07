@@ -26,10 +26,25 @@ def create_product_endpoint(
 def get_products_endpoint(
     skip: int = 0,
     limit: int = 10,
+    search: str | None = None,
+    category_id: int | None = None,
+    low_stock: bool | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    return get_products(db, current_user.id, skip, limit)
+    return get_products(
+        db, 
+        current_user.id, 
+        skip=skip, 
+        limit=limit, 
+        search=search, 
+        category_id=category_id, 
+        low_stock=low_stock, 
+        min_price=min_price, 
+        max_price=max_price
+    )
 
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product_endpoint(
