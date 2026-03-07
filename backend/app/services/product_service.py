@@ -12,8 +12,38 @@ def create_product(db: Session, product: ProductCreate, user_id: int) -> Product
     log_activity(db, user_id, "create_product", "product", db_product.id)
     return db_product
 
-def get_products(db: Session, user_id: int, skip: int = 0, limit: int = 10):
-    return db.query(Product).filter(Product.user_id == user_id).offset(skip).limit(limit).all()
+def get_products(
+    db: Session, 
+    user_id: int, 
+    skip: int = 0, 
+    limit: int = 10,
+    search: str | None = None,
+    category_id: int | None = None,
+    low_stock: bool | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None
+):
+    query = db.query(Product).filter(Product.user_id == user_id)
+
+    if search:
+        query = query.filter(
+            (Product.name.ilike(f"%{search}%")) | 
+            (Product.barcode.ilike(f"%{search}%"))
+        )
+
+    if category_id:
+        query = query.filter(Product.category_id == category_id)
+
+    if low_stock:
+        query = query.filter(Product.stock <= Product.min_stock)
+
+    if min_price is not None:
+        query = query.filter(Product.price >= min_price)
+
+    if max_price is not None:
+        query = query.filter(Product.price <= max_price)
+
+    return query.order_by(Product.created_at.desc()).offset(skip).limit(limit).all()
 
 def get_product_by_id(db: Session, product_id: int, user_id: int) -> Product:
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == user_id).first()
