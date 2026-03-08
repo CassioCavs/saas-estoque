@@ -1,12 +1,36 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { categoriesService } from '../services/api'
 
 export default function ProductForm({ initialValues, onSubmit, mode = 'create', loading = false, error = '' }) {
   const navigate = useNavigate()
-  const [form, setForm] = useState(initialValues ?? { name: '', price: '', stock: '' })
+  const [form, setForm] = useState({
+    name: '',
+    price: '',
+    stock: '',
+    category_id: '',
+    ...initialValues
+  })
+  const [categories, setCategories] = useState([])
+  const [fetchingCategories, setFetchingCategories] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touched, setTouched] = useState({})
   const nameRef = useRef(null)
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        setFetchingCategories(true)
+        const { data } = await categoriesService.getAll()
+        setCategories(Array.isArray(data) ? data : [])
+      } catch (err) {
+        console.error('Error loading categories:', err)
+      } finally {
+        setFetchingCategories(false)
+      }
+    }
+    loadCategories()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -40,6 +64,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       name: form.name.trim(),
       price: Number(form.price),
       stock: Number(form.stock),
+      category_id: form.category_id ? Number(form.category_id) : null,
     })
   }
 
@@ -70,6 +95,28 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
           className={`input-field ${touched.name && fieldErrors.name ? 'error' : ''}`}
           autoFocus
         />
+      </Field>
+
+      {/* Category */}
+      <Field label="Category">
+        <div className="relative group">
+          <select
+            id="category_id" name="category_id"
+            value={form.category_id || ''} onChange={handleChange}
+            disabled={fetchingCategories}
+            className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+          >
+            <option value="" className="bg-[#0b0b14]">No category</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id} className="bg-[#0b0b14]">{cat.name}</option>
+            ))}
+          </select>
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
+            <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 1l4 4 4-4" />
+            </svg>
+          </div>
+        </div>
       </Field>
 
       {/* Price + Stock */}

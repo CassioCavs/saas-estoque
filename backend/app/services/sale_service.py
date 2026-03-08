@@ -29,7 +29,7 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
         })
 
     # Criar Sale
-    db_sale = Sale(user_id=user_id, total=total)
+    db_sale = Sale(user_id=user_id, customer_id=sale_data.customer_id, total=total)
     db.add(db_sale)
     db.commit()
     db.refresh(db_sale)

@@ -50,25 +50,6 @@ export default function Sales() {
     setPdvOpen(true)
   }
 
-  const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.product_id === product.id)
-      if (existing) {
-        return prev.map(item => 
-          item.product_id === product.id 
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [...prev, { 
-        product_id: product.id, 
-        name: product.name, 
-        price: product.price, 
-        quantity: 1 
-      }]
-    })
-  }
-
   const updateCartQuantity = (productId, delta) => {
     setCart(prev => prev.map(item => {
       if (item.product_id === productId) {
@@ -82,11 +63,16 @@ export default function Sales() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
   const handleConfirmSale = async () => {
-    if (!selectedCustomer || cart.length === 0) return
+    // If no customer is selected, we can treat it as a walk-in sale (customer_id: null)
+    if (cart.length === 0) {
+      alert('Your cart is empty')
+      return
+    }
+    
     setSaveLoading(true)
     try {
       await salesService.create({
-        customer_id: selectedCustomer.id,
+        customer_id: selectedCustomer?.id || null,
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
@@ -100,6 +86,34 @@ export default function Sales() {
     } finally {
       setSaveLoading(false)
     }
+  }
+
+  function addToCart(product) {
+    if (product.stock <= 0) {
+      alert('Product out of stock!')
+      return
+    }
+
+    setCart(prev => {
+      const existing = prev.find(item => item.product_id === product.id)
+      if (existing) {
+        if (existing.quantity >= product.stock) {
+          alert('Cannot add more than available stock!')
+          return prev
+        }
+        return prev.map(item => item.product_id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+        )
+      }
+      return [...prev, {
+        product_id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        max_stock: product.stock
+      }]
+    })
   }
 
   const filteredPdvProducts = products.filter(p => 
@@ -230,24 +244,41 @@ export default function Sales() {
               {/* Right: Cart & Checkout */}
               <div className="w-[360px] bg-white/[0.01] flex flex-col overflow-hidden">
                 <div className="p-6 flex-1 flex flex-col overflow-hidden">
-                  <h3 className="text-[14px] font-bold text-white mb-4 uppercase tracking-wider opacity-60">Order Summary</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[12px] font-bold text-white uppercase tracking-wider opacity-60">Order Summary</h3>
+                    {cart.length > 0 && (
+                      <button onClick={() => setCart([])} className="text-[10px] text-danger hover:underline">Clear all</button>
+                    )}
+                  </div>
                   
                   {/* Customer Select */}
                   <div className="mb-6">
-                    <label className="text-[10px] font-bold text-text-tertiary uppercase mb-1.5 block">Select Customer</label>
-                    <select 
-                      className="input-field h-10 bg-white/[0.05] border-white/10 text-[13px]"
-                      value={selectedCustomer?.id || ''}
-                      onChange={e => {
-                        const cust = customers.find(c => c.id === Number(e.target.value))
-                        setSelectedCustomer(cust)
-                      }}
-                    >
-                      <option value="" disabled>Choose a customer...</option>
-                      {customers.map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
+                    <label className="text-[10px] font-bold text-text-tertiary uppercase mb-1.5 block tracking-[0.05em]">Select Customer</label>
+                    <div className="relative group">
+                      <select 
+                        className="input-field appearance-none h-10 bg-white/[0.05] border-white/10 text-[13px] pr-8 cursor-pointer hover:bg-white/[0.08] transition-colors"
+                        value={selectedCustomer?.id || ''}
+                        onChange={e => {
+                          const val = e.target.value
+                          if (val === '') {
+                            setSelectedCustomer(null)
+                          } else {
+                            const cust = customers.find(c => c.id === Number(val))
+                            setSelectedCustomer(cust)
+                          }
+                        }}
+                      >
+                        <option value="" className="bg-[#0b0b14]">Walk-in Customer (Default)</option>
+                        {customers.map(c => (
+                          <option key={c.id} value={c.id} className="bg-[#0b0b14]">{c.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
+                        <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 1L6 6 1 1" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Cart Items */}
@@ -269,7 +300,11 @@ export default function Sales() {
                           <div className="flex items-center gap-2.5 bg-black/20 rounded-lg p-1 border border-white/5">
                             <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-white transition-colors">-</button>
                             <span className="text-[12px] font-bold min-w-[20px] text-center">{item.quantity}</span>
-                            <button onClick={() => updateCartQuantity(item.product_id, 1)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-white transition-colors">+</button>
+                            <button 
+                              onClick={() => updateCartQuantity(item.product_id, 1)} 
+                              disabled={item.quantity >= item.max_stock}
+                              className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            >+</button>
                           </div>
                         </div>
                       ))

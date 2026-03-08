@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models.category import Category
+from app.models.product import Product
 from app.schemas.category_schema import CategoryCreate, CategoryUpdate
 from .activity_log_service import log_activity
 
@@ -35,3 +36,8 @@ def delete_category(db: Session, category_id: int, user_id: int):
     db.delete(category)
     db.commit()
     log_activity(db, user_id, "delete_category", "category", category_id)
+
+def get_products_by_category(db: Session, category_id: int, user_id: int) -> list[Product]:
+    # Primeiro verifica se a categoria pertence ao usuário
+    get_category_by_id(db, category_id, user_id)
+    return db.query(Product).filter(Product.category_id == category_id, Product.user_id == user_id).all()

@@ -74,13 +74,13 @@ const LogoutIcon = () => (
 )
 
 const navLinks = [
+  { to: '/sales',     label: 'Sales',     icon: CartIcon },
   { to: '/dashboard', label: 'Dashboard', icon: GridIcon },
   { to: '/products',  label: 'Products',  icon: BoxIcon  },
   { to: '/categories', label: 'Categories', icon: TagIcon },
   { to: '/customers', label: 'Customers', icon: UsersIcon },
-  { to: '/sales',     label: 'Sales',     icon: CartIcon },
   { to: '/reports',   label: 'Analytics', icon: ChartIcon },
-  { to: '/stock-history', label: 'History', icon: HistoryIcon },
+  { to: '/history',   label: 'History',   icon: HistoryIcon },
   { to: '/alerts',    label: 'Alerts',    icon: AlertIcon },
 ]
 

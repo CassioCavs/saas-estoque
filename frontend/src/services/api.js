@@ -62,11 +62,12 @@ export const productsService = {
 
 // ─── Categories Endpoints ────────────────────────────────────────────────
 export const categoriesService = {
-  getAll:  ()           => api.get('/categories/'),
-  getById: (id)         => api.get(`/categories/${id}`),
-  create:  (data)       => api.post('/categories/', data),
-  update:  (id, data)   => api.put(`/categories/${id}`, data),
-  delete:  (id)         => api.delete(`/categories/${id}`),
+  getAll:      ()           => api.get('/categories/'),
+  getById:     (id)         => api.get(`/categories/${id}`),
+  getProducts: (id)         => api.get(`/categories/${id}/products`),
+  create:      (data)       => api.post('/categories/', data),
+  update:      (id, data)   => api.put(`/categories/${id}`, data),
+  delete:      (id)         => api.delete(`/categories/${id}`),
 }
 
 // ─── Customers Endpoints ─────────────────────────────────────────────────
@@ -91,9 +92,9 @@ export const reportsService = {
   getTopProducts: (limit = 10) => api.get('/reports/top-products/', { params: { limit } }),
 }
 
-// ─── Stock & Alerts Endpoints ───────────────────────────────────────────
+// ─── Stock & History Endpoints ───────────────────────────────────────────
 export const stockService = {
-  getHistory: ()        => api.get('/stock/history/'),
+  getHistory: ()        => api.get('/history/'),
   createMovement: (data) => api.post('/stock/movement/', data),
 }
 

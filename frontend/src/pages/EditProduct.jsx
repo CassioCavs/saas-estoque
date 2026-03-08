@@ -105,7 +105,12 @@ export default function EditProduct() {
         <div className="px-6 py-5">
           <ProductForm
             mode="edit"
-            initialValues={{ name: product?.name ?? '', price: product?.price ?? '', stock: product?.stock ?? '' }}
+            initialValues={{ 
+              name: product?.name ?? '', 
+              price: product?.price ?? '', 
+              stock: product?.stock ?? '',
+              category_id: product?.category_id ?? ''
+            }}
             onSubmit={handleSubmit}
             loading={saveLoading}
             error={saveError}
