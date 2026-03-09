@@ -173,7 +173,7 @@ function ColHeader({ children, align = 'left' }) {
 }
 
 /* ── Main ───────────────────────────────────────────────────────────── */
-export default function ProductsTable({ products, loading, onRefresh }) {
+export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
   const navigate = useNavigate()
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -196,7 +196,7 @@ export default function ProductsTable({ products, loading, onRefresh }) {
   }
 
   if (loading) return <TableSkeleton />
-  if (!products || products.length === 0) return <EmptyState onAdd={() => navigate('/create-product')} />
+  if (!products || products.length === 0) return <EmptyState onAdd={onAdd || (() => navigate('/create-product'))} />
 
   const totalValue = products.reduce((s, p) => s + Number(p.price) * Number(p.stock), 0)
 

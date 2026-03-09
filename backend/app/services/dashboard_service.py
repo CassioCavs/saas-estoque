@@ -9,8 +9,17 @@ def get_dashboard_summary(db: Session, user_id: int) -> DashboardSummary:
     # Total products
     total_products = db.query(func.count(Product.id)).filter(Product.user_id == user_id).scalar()
 
-    # Total stock value
-    total_stock_value = db.query(func.sum(Product.price * Product.stock)).filter(Product.user_id == user_id).scalar() or 0.0
+    # Total sale value (estoque * sale_price)
+    total_sale_value = db.query(func.sum(Product.sale_price * Product.stock)).filter(Product.user_id == user_id).scalar() or 0.0
+
+    # Total cost value (estoque * cost_price)
+    total_cost_value = db.query(func.sum(Product.cost_price * Product.stock)).filter(Product.user_id == user_id).scalar() or 0.0
+
+    # Potential profit
+    potential_profit = total_sale_value - total_cost_value
+
+    # Average margin
+    average_margin = db.query(func.avg(Product.profit_margin)).filter(Product.user_id == user_id).scalar() or 0.0
 
     # Low stock products
     low_stock_products = db.query(func.count(Product.id)).filter(
@@ -27,7 +36,10 @@ def get_dashboard_summary(db: Session, user_id: int) -> DashboardSummary:
 
     return DashboardSummary(
         total_products=total_products,
-        total_stock_value=total_stock_value,
+        total_stock_value=total_sale_value,
+        total_cost_value=total_cost_value,
+        potential_profit=potential_profit,
+        average_margin=average_margin,
         low_stock_products=low_stock_products,
         total_movements_today=total_movements_today
     )

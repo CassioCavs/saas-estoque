@@ -9,7 +9,10 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String)
-    price = Column(Float, nullable=False)
+    price = Column(Float, nullable=False) # Mantido para compatibilidade, será o sale_price
+    cost_price = Column(Float, nullable=False, default=0.0)
+    profit_margin = Column(Float, nullable=False, default=0.0)
+    sale_price = Column(Float, nullable=False, default=0.0)
     stock = Column(Integer, nullable=False, default=0)
     min_stock = Column(Integer, nullable=False, default=0)
     barcode = Column(String, unique=True, index=True)

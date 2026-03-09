@@ -125,7 +125,12 @@ export default function Products() {
 
       {/* ── Table ── */}
       {(filtered.length > 0 || loading || !search) && (
-        <ProductsTable products={filtered} loading={loading} onRefresh={fetchProducts} />
+        <ProductsTable 
+          products={filtered} 
+          loading={loading} 
+          onRefresh={fetchProducts} 
+          onAdd={() => navigate('/create-product')}
+        />
       )}
     </Layout>
   )

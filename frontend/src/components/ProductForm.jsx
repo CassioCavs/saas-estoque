@@ -6,7 +6,9 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
   const navigate = useNavigate()
   const [form, setForm] = useState({
     name: '',
-    price: '',
+    cost_price: '',
+    profit_margin: '',
+    sale_price: '',
     stock: '',
     category_id: '',
     ...initialValues
@@ -34,7 +36,32 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    const val = value === '' ? '' : Number(value)
+    
+    setForm(prev => {
+      const next = { ...prev, [name]: value }
+      
+      // Lógica de cálculo bidirecional
+      if (name === 'cost_price' || name === 'profit_margin') {
+        const cost = name === 'cost_price' ? val : Number(prev.cost_price)
+        const margin = name === 'profit_margin' ? val : Number(prev.profit_margin)
+        
+        if (cost > 0) {
+          next.sale_price = (cost * (1 + margin / 100)).toFixed(2)
+        }
+      } 
+      else if (name === 'sale_price') {
+        const cost = Number(prev.cost_price)
+        const sale = val
+        
+        if (cost > 0) {
+          next.profit_margin = (((sale - cost) / cost) * 100).toFixed(2)
+        }
+      }
+      
+      return next
+    })
+    
     if (fieldErrors[name]) setFieldErrors(prev => ({ ...prev, [name]: '' }))
   }
 
@@ -45,10 +72,9 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
   const validate = () => {
     const errs = {}
     if (!form.name.trim()) errs.name = 'Required'
-    if (form.price === '') errs.price = 'Required'
-    else if (isNaN(form.price) || Number(form.price) < 0) errs.price = 'Enter a valid price'
+    if (form.cost_price === '') errs.cost_price = 'Required'
+    if (form.sale_price === '') errs.sale_price = 'Required'
     if (form.stock === '') errs.stock = 'Required'
-    else if (!Number.isInteger(Number(form.stock)) || Number(form.stock) < 0) errs.stock = 'Enter a whole number ≥ 0'
     return errs
   }
 
@@ -57,19 +83,23 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setFieldErrors(errs)
-      setTouched({ name: true, price: true, stock: true })
+      setTouched({ name: true, cost_price: true, sale_price: true, stock: true })
       return
     }
     await onSubmit({
+      ...form,
       name: form.name.trim(),
-      price: Number(form.price),
+      cost_price: Number(form.cost_price),
+      profit_margin: Number(form.profit_margin),
+      sale_price: Number(form.sale_price),
+      price: Number(form.sale_price), // Mantém price para compatibilidade
       stock: Number(form.stock),
       category_id: form.category_id ? Number(form.category_id) : null,
     })
   }
 
-  const totalValue = (Number(form.price || 0) * Number(form.stock || 0)).toFixed(2)
-  const showPreview = form.price !== '' && form.stock !== '' && !fieldErrors.price && !fieldErrors.stock
+  const totalValue = (Number(form.sale_price || 0) * Number(form.stock || 0)).toFixed(2)
+  const showPreview = form.sale_price !== '' && form.stock !== '' && !fieldErrors.sale_price && !fieldErrors.stock
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5 max-w-[440px]">
@@ -119,26 +149,62 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
         </div>
       </Field>
 
-      {/* Price + Stock */}
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Price (USD)" required error={touched.price && fieldErrors.price}>
+      {/* Prices Logic */}
+      <div className="grid grid-cols-3 gap-3">
+        <Field label="Cost (USD)" required error={touched.cost_price && fieldErrors.cost_price}>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">$</span>
             <input
-              id="price" name="price" type="number" min="0" step="0.01"
-              value={form.price} onChange={handleChange} onBlur={handleBlur}
+              id="cost_price" name="cost_price" type="number" min="0" step="0.01"
+              value={form.cost_price} onChange={handleChange} onBlur={handleBlur}
               placeholder="0.00"
-              className={`input-field pl-6 ${touched.price && fieldErrors.price ? 'error' : ''}`}
+              className={`input-field pl-6 ${touched.cost_price && fieldErrors.cost_price ? 'error' : ''}`}
             />
           </div>
         </Field>
 
-        <Field label="Stock" required error={touched.stock && fieldErrors.stock}>
+        <Field label="Margin (%)" error={touched.profit_margin && fieldErrors.profit_margin}>
+          <div className="relative">
+            <input
+              id="profit_margin" name="profit_margin" type="number" step="0.1"
+              value={form.profit_margin} onChange={handleChange} onBlur={handleBlur}
+              placeholder="0"
+              className="input-field pr-6"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">%</span>
+          </div>
+        </Field>
+
+        <Field label="Sale Price" required error={touched.sale_price && fieldErrors.sale_price}>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">$</span>
+            <input
+              id="sale_price" name="sale_price" type="number" min="0" step="0.01"
+              value={form.sale_price} onChange={handleChange} onBlur={handleBlur}
+              placeholder="0.00"
+              className={`input-field pl-6 border-accent/30 ${touched.sale_price && fieldErrors.sale_price ? 'error' : ''}`}
+            />
+          </div>
+        </Field>
+      </div>
+
+      {/* Stock */}
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Current Stock" required error={touched.stock && fieldErrors.stock}>
           <input
             id="stock" name="stock" type="number" min="0" step="1"
             value={form.stock} onChange={handleChange} onBlur={handleBlur}
             placeholder="0"
             className={`input-field ${touched.stock && fieldErrors.stock ? 'error' : ''}`}
+          />
+        </Field>
+        
+        <Field label="Min. Stock">
+          <input
+            id="min_stock" name="min_stock" type="number" min="0" step="1"
+            value={form.min_stock || ''} onChange={handleChange}
+            placeholder="0"
+            className="input-field"
           />
         </Field>
       </div>
