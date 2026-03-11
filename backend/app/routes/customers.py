@@ -8,6 +8,7 @@ from app.services.customer_service import (
     create_customer,
     get_customers,
     get_customer_by_id,
+    search_customers,
     update_customer,
     delete_customer
 )
@@ -30,6 +31,15 @@ def get_customers_endpoint(
     db: Session = Depends(get_db)
 ):
     return get_customers(db, current_user.id, skip, limit)
+
+@router.get("/search", response_model=List[CustomerResponse])
+def search_customers_endpoint(
+    name: str,
+    limit: int = 10,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return search_customers(db, current_user.id, name, limit)
 
 @router.get("/{customer_id}", response_model=CustomerResponse)
 def get_customer_endpoint(

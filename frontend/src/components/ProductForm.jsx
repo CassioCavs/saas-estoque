@@ -72,7 +72,6 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
   const validate = () => {
     const errs = {}
     if (!form.name.trim()) errs.name = 'Required'
-    if (form.cost_price === '') errs.cost_price = 'Required'
     if (form.sale_price === '') errs.sale_price = 'Required'
     if (form.stock === '') errs.stock = 'Required'
     return errs
@@ -83,14 +82,14 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setFieldErrors(errs)
-      setTouched({ name: true, cost_price: true, sale_price: true, stock: true })
+      setTouched({ name: true, sale_price: true, stock: true })
       return
     }
     await onSubmit({
       ...form,
       name: form.name.trim(),
-      cost_price: Number(form.cost_price),
-      profit_margin: Number(form.profit_margin),
+      cost_price: form.cost_price !== '' ? Number(form.cost_price) : null,
+      profit_margin: form.profit_margin !== '' ? Number(form.profit_margin) : null,
       sale_price: Number(form.sale_price),
       price: Number(form.sale_price), // Mantém price para compatibilidade
       stock: Number(form.stock),
@@ -151,7 +150,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
       {/* Prices Logic */}
       <div className="grid grid-cols-3 gap-3">
-        <Field label="Cost (USD)" required error={touched.cost_price && fieldErrors.cost_price}>
+        <Field label="Cost (USD)" error={touched.cost_price && fieldErrors.cost_price}>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">$</span>
             <input

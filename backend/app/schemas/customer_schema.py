@@ -5,11 +5,13 @@ class CustomerCreate(BaseModel):
     name: str = Field(..., min_length=1)
     email: EmailStr | None = None
     phone: str | None = None
+    observations: str | None = None
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1)
     email: EmailStr | None = None
     phone: str | None = None
+    observations: str | None = None
 
 class CustomerResponse(BaseModel):
     id: int
@@ -17,6 +19,7 @@ class CustomerResponse(BaseModel):
     name: str
     email: str | None
     phone: str | None
+    observations: str | None = None
     created_at: datetime
 
     class Config:

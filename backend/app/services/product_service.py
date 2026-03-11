@@ -5,23 +5,20 @@ from app.schemas.product_schema import ProductCreate, ProductUpdate
 from .activity_log_service import log_activity
 
 def calculate_prices(data: dict) -> dict:
-    cost = data.get("cost_price", 0)
-    margin = data.get("profit_margin", 0)
-    sale = data.get("sale_price", 0)
+    cost = data.get("cost_price") or 0.0
+    margin = data.get("profit_margin") or 0.0
+    sale = data.get("sale_price") or 0.0
 
-    # Se a margem foi alterada (ou custo), recalcula o preço de venda
     if "profit_margin" in data or "cost_price" in data:
-        if cost > 0:
+        if cost > 0 and margin is not None:
             sale = cost * (1 + margin / 100)
             data["sale_price"] = round(sale, 2)
-            data["price"] = data["sale_price"] # Sincroniza campo legado
-
-    # Se o preço de venda foi alterado manualmente, recalcula a margem
+            data["price"] = data["sale_price"]
     elif "sale_price" in data:
         if cost > 0:
             margin = ((sale - cost) / cost) * 100
             data["profit_margin"] = round(margin, 2)
-            data["price"] = sale # Sincroniza campo legado
+        data["price"] = sale
             
     return data
 
@@ -80,27 +77,24 @@ def update_product(db: Session, product_id: int, product_update: ProductUpdate, 
     
     update_data = product_update.dict(exclude_unset=True)
     
-    # Atualiza valores locais antes do cálculo se necessário
-    calc_input = {
-        "cost_price": update_data.get("cost_price", product.cost_price),
-        "profit_margin": update_data.get("profit_margin", product.profit_margin),
-        "sale_price": update_data.get("sale_price", product.sale_price)
-    }
+    cost = update_data.get("cost_price", product.cost_price)
+    if cost is None: cost = 0.0
     
-    # Lógica de prioridade: 
-    # 1. Se alterou custo ou margem -> recalcula venda
-    # 2. Se alterou venda (e não margem) -> recalcula margem
+    margin = update_data.get("profit_margin", product.profit_margin)
+    if margin is None: margin = 0.0
+    
+    sale = update_data.get("sale_price", product.sale_price)
+
     if "cost_price" in update_data or "profit_margin" in update_data:
-        if calc_input["cost_price"] > 0:
-            calc_input["sale_price"] = round(calc_input["cost_price"] * (1 + calc_input["profit_margin"] / 100), 2)
-            update_data["sale_price"] = calc_input["sale_price"]
+        if cost > 0:
+            new_sale = cost * (1 + margin / 100)
+            update_data["sale_price"] = round(new_sale, 2)
             update_data["price"] = update_data["sale_price"]
-            
     elif "sale_price" in update_data:
-        if calc_input["cost_price"] > 0:
-            calc_input["profit_margin"] = round(((calc_input["sale_price"] - calc_input["cost_price"]) / calc_input["cost_price"]) * 100, 2)
-            update_data["profit_margin"] = calc_input["profit_margin"]
-            update_data["price"] = update_data["sale_price"]
+        if cost > 0:
+            new_margin = ((sale - cost) / cost) * 100
+            update_data["profit_margin"] = round(new_margin, 2)
+        update_data["price"] = sale
 
     for key, value in update_data.items():
         setattr(product, key, value)

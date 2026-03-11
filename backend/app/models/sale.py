@@ -10,11 +10,14 @@ class Sale(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     total = Column(Float, nullable=False)
+    amount_received = Column(Float, nullable=True)
+    change_given = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User")
     customer = relationship("Customer")
     items = relationship("SaleItem", back_populates="sale")
+    payments = relationship("Payment", back_populates="sale")
 
 class SaleItem(Base):
     __tablename__ = "sale_items"

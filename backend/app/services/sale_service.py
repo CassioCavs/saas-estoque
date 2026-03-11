@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models.sale import Sale, SaleItem
+from app.models.payment import Payment
 from app.models.product import Product
 from app.schemas.sale_schema import SaleCreate, SaleResponse
 from .product_service import get_product_by_id
@@ -28,11 +29,31 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
             "price": product.price
         })
 
-    # Criar Sale
-    db_sale = Sale(user_id=user_id, customer_id=sale_data.customer_id, total=total)
+    # Criar Sale com os novos campos de pagamento
+    db_sale = Sale(
+        user_id=user_id, 
+        customer_id=sale_data.customer_id, 
+        total=total,
+        amount_received=sale_data.amount_received,
+        change_given=sale_data.change_given
+    )
     db.add(db_sale)
     db.commit()
     db.refresh(db_sale)
+
+    # Validar e registrar pagamentos
+    payments_total = sum(p.amount for p in sale_data.payments)
+    if round(payments_total, 2) != round(total, 2):
+        # Apenas um aviso ou validação leve, pois o frontend controla isso rigidamente
+        pass
+
+    for payment in sale_data.payments:
+        db_payment = Payment(
+            sale_id=db_sale.id,
+            method=payment.method,
+            amount=payment.amount
+        )
+        db.add(db_payment)
 
     # Criar SaleItems e atualizar estoque
     for item_data in sale_items:

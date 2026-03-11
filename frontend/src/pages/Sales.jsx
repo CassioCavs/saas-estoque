@@ -12,9 +12,17 @@ export default function Sales() {
   const [customers, setCustomers] = useState([])
   const [products, setProducts] = useState([])
   const [selectedCustomer, setSelectedCustomer] = useState(null)
+  const [customerSearch, setCustomerSearch] = useState('')
+  const [customerSearchFocus, setCustomerSearchFocus] = useState(false)
   const [cart, setCart] = useState([])
   const [pdvSearch, setPdvSearch] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
+  
+  // Payments State
+  const [payments, setPayments] = useState([])
+  const [payMethod, setPayMethod] = useState('cash')
+  const [payAmount, setPayAmount] = useState('')
+  const [payReceived, setPayReceived] = useState('')
 
   const fetchSales = useCallback(async () => {
     setLoading(true); setError('')
@@ -46,7 +54,12 @@ export default function Sales() {
   const handleOpenPdv = () => {
     fetchPdvData()
     setSelectedCustomer(null)
+    setCustomerSearch('')
     setCart([])
+    setPayments([])
+    setPayMethod('cash')
+    setPayAmount('')
+    setPayReceived('')
     setPdvOpen(true)
   }
 
@@ -61,6 +74,35 @@ export default function Sales() {
   }
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  
+  const paymentsTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+  const remaining = Math.max(0, cartTotal - paymentsTotal)
+  const isFullyPaid = cart.length > 0 && paymentsTotal >= cartTotal - 0.01
+
+  const handleAddPayment = () => {
+    const amt = Number(payAmount)
+    if (!amt || amt <= 0) return alert('Enter a valid amount')
+    if (amt > remaining + 0.01 && payMethod !== 'cash') return alert('Amount cannot exceed remaining total unless using cash')
+    
+    // For cash, we allow amt > remaining to calculate change. 
+    // Effectively, the applied amount is only up to the remaining.
+    const appliedAmount = Math.min(amt, remaining)
+    const received = payMethod === 'cash' ? Number(payReceived || amt) : amt
+    
+    setPayments([...payments, { 
+      id: Date.now(), 
+      method: payMethod, 
+      amount: appliedAmount, 
+      received: received,
+      change: Math.max(0, received - appliedAmount)
+    }])
+    setPayAmount('')
+    setPayReceived('')
+  }
+  
+  const handleRemovePayment = (id) => {
+    setPayments(payments.filter(p => p.id !== id))
+  }
 
   const handleConfirmSale = async () => {
     // If no customer is selected, we can treat it as a walk-in sale (customer_id: null)
@@ -68,15 +110,28 @@ export default function Sales() {
       alert('Your cart is empty')
       return
     }
+    if (!isFullyPaid) {
+      alert('Order is not fully paid yet')
+      return
+    }
     
     setSaveLoading(true)
     try {
+      const totalAmountReceived = payments.reduce((sum, p) => sum + p.received, 0)
+      const totalChangeGiven = payments.reduce((sum, p) => sum + p.change, 0)
+
       await salesService.create({
         customer_id: selectedCustomer?.id || null,
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
           price: item.price
+        })),
+        amount_received: totalAmountReceived,
+        change_given: totalChangeGiven,
+        payments: payments.map(p => ({
+          method: p.method,
+          amount: p.amount
         }))
       })
       setPdvOpen(false)
@@ -121,6 +176,11 @@ export default function Sales() {
     (p.barcode && p.barcode.includes(pdvSearch))
   )
 
+  const filteredCustomers = customers.filter(c => 
+    c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+    (c.phone && c.phone.includes(customerSearch))
+  ).slice(0, 5)
+
   return (
     <Layout title="Sales" subtitle="Manage your revenue and orders">
       
@@ -160,6 +220,8 @@ export default function Sales() {
               <tr className="bg-white/[0.02] border-b border-white/[0.06]">
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Sale ID</th>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Customer</th>
+                <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Items</th>
+                <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Payment Details</th>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Date</th>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider text-right">Total</th>
               </tr>
@@ -169,7 +231,20 @@ export default function Sales() {
                 <tr key={sale.id} className="hover:bg-white/[0.01] transition-colors">
                   <td className="px-5 py-4 font-mono text-[11px] text-text-muted">#{String(sale.id).padStart(6, '0')}</td>
                   <td className="px-5 py-4 font-medium text-text-primary">{sale.customer?.name || 'Walk-in Customer'}</td>
-                  <td className="px-5 py-4 text-text-secondary">{new Date(sale.created_at).toLocaleString()}</td>
+                  <td className="px-5 py-4 text-text-secondary text-[12px] max-w-[150px] truncate" title={sale.items?.length + " items"}>
+                    {sale.items?.length || 0} items
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[12px] font-medium text-text-primary capitalize">
+                        {sale.payments?.map(p => p.method).join(', ') || 'N/A'}
+                      </span>
+                      {sale.change_given > 0 && (
+                        <span className="text-[10px] text-success font-mono">Change: ${sale.change_given.toFixed(2)}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-text-secondary text-[12px]">{new Date(sale.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
                   <td className="px-5 py-4 text-right font-semibold text-accent">${sale.total.toFixed(2)}</td>
                 </tr>
               ))}
@@ -251,59 +326,71 @@ export default function Sales() {
                     )}
                   </div>
                   
-                  {/* Customer Select */}
-                  <div className="mb-6">
+                  {/* Customer Select / Search */}
+                  <div className="mb-6 relative">
                     <label className="text-[10px] font-bold text-text-tertiary uppercase mb-1.5 block tracking-[0.05em]">Select Customer</label>
-                    <div className="relative group">
-                      <select 
-                        className="input-field appearance-none h-10 bg-white/[0.05] border-white/10 text-[13px] pr-8 cursor-pointer hover:bg-white/[0.08] transition-colors"
-                        value={selectedCustomer?.id || ''}
-                        onChange={e => {
-                          const val = e.target.value
-                          if (val === '') {
-                            setSelectedCustomer(null)
-                          } else {
-                            const cust = customers.find(c => c.id === Number(val))
-                            setSelectedCustomer(cust)
-                          }
-                        }}
-                      >
-                        <option value="" className="bg-[#0b0b14]">Walk-in Customer (Default)</option>
-                        {customers.map(c => (
-                          <option key={c.id} value={c.id} className="bg-[#0b0b14]">{c.name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
-                        <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M11 1L6 6 1 1" />
-                        </svg>
+                    {selectedCustomer ? (
+                      <div className="flex items-center justify-between bg-white/[0.05] border border-white/10 rounded-lg p-3">
+                        <div>
+                          <p className="text-[13px] font-medium text-white">{selectedCustomer.name}</p>
+                          {selectedCustomer.phone && <p className="text-[11px] text-text-muted">{selectedCustomer.phone}</p>}
+                        </div>
+                        <button onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }} className="text-[11px] text-danger hover:underline">Remove</button>
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <input 
+                          type="text" 
+                          placeholder="Search customer by name or phone..."
+                          className="input-field h-10 w-full bg-white/[0.05] border-white/10 text-[13px]"
+                          value={customerSearch}
+                          onChange={e => setCustomerSearch(e.target.value)}
+                          onFocus={() => setCustomerSearchFocus(true)}
+                          onBlur={() => setTimeout(() => setCustomerSearchFocus(false), 200)}
+                        />
+                        {customerSearchFocus && customerSearch && (
+                          <div className="absolute top-16 left-0 right-0 bg-[#12121c] border border-white/10 rounded-lg shadow-xl z-10 overflow-hidden max-h-[160px] overflow-y-auto">
+                            {filteredCustomers.length > 0 ? filteredCustomers.map(c => (
+                              <button 
+                                key={c.id} 
+                                className="w-full text-left px-4 py-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.02] last:border-0"
+                                onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }}
+                              >
+                                <span className="block text-[13px] text-white">{c.name}</span>
+                                {c.phone && <span className="block text-[10px] text-text-muted">{c.phone}</span>}
+                              </button>
+                            )) : (
+                              <div className="px-4 py-3 text-[12px] text-text-muted text-center">No customer found. Walk-in default.</div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {/* Cart Items */}
-                  <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar mb-6">
+                  <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar mb-2 max-h-[200px]">
                     {cart.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center opacity-30">
-                        <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mb-2">
+                      <div className="h-full flex flex-col items-center justify-center opacity-30 py-8">
+                        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mb-2">
                           <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <p className="text-[12px] font-medium">Cart is empty</p>
                       </div>
                     ) : (
                       cart.map(item => (
-                        <div key={item.product_id} className="flex items-center gap-3 bg-white/[0.03] p-3 rounded-xl border border-white/[0.05]">
+                        <div key={item.product_id} className="flex items-center gap-3 bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
                           <div className="flex-1 min-w-0">
                             <h5 className="text-[12px] font-semibold text-text-primary truncate">{item.name}</h5>
                             <span className="text-[11px] font-mono text-accent">${item.price.toFixed(2)}</span>
                           </div>
-                          <div className="flex items-center gap-2.5 bg-black/20 rounded-lg p-1 border border-white/5">
-                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-white transition-colors">-</button>
-                            <span className="text-[12px] font-bold min-w-[20px] text-center">{item.quantity}</span>
+                          <div className="flex items-center gap-2 bg-black/20 rounded-lg p-1 border border-white/5">
+                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-white transition-colors">-</button>
+                            <span className="text-[11px] font-bold min-w-[16px] text-center">{item.quantity}</span>
                             <button 
                               onClick={() => updateCartQuantity(item.product_id, 1)} 
                               disabled={item.quantity >= item.max_stock}
-                              className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             >+</button>
                           </div>
                         </div>
@@ -312,24 +399,86 @@ export default function Sales() {
                   </div>
 
                   {/* Totals */}
-                  <div className="pt-6 border-t border-white/10 space-y-2">
-                    <div className="flex justify-between text-[13px] text-text-muted">
-                      <span>Subtotal</span>
-                      <span>${cartTotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[13px] text-text-muted pb-2">
-                      <span>Tax (0%)</span>
-                      <span>$0.00</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
+                  <div className="pt-4 border-t border-white/10 mb-4">
+                    <div className="flex justify-between items-center">
                       <span className="text-[14px] font-bold text-white uppercase tracking-wider">Total</span>
-                      <span className="text-[24px] font-black text-accent tracking-tight">${cartTotal.toFixed(2)}</span>
+                      <span className="text-[20px] font-black text-accent tracking-tight">${cartTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
+                  {/* Payments Section */}
+                  {cart.length > 0 && (
+                    <div className="mb-4 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <label className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Payment Details</label>
+                        <span className="text-[11px] font-mono text-warning">Remaining: ${remaining.toFixed(2)}</span>
+                      </div>
+                      
+                      {/* Added Payments List */}
+                      {payments.length > 0 && (
+                        <div className="space-y-2 mb-3">
+                          {payments.map(p => (
+                            <div key={p.id} className="flex justify-between items-center text-[12px] bg-black/30 px-3 py-2 rounded-lg border border-white/[0.02]">
+                              <div className="flex items-center gap-2 text-text-secondary capitalize">
+                                <span>{p.method}</span>
+                                {p.change > 0 && <span className="text-[10px] text-success font-mono bg-success/10 px-1.5 rounded">Change: ${p.change.toFixed(2)}</span>}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-mono text-white">${p.amount.toFixed(2)}</span>
+                                <button onClick={() => handleRemovePayment(p.id)} className="text-danger hover:text-white transition-colors">✕</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add New Payment form */}
+                      {!isFullyPaid && (
+                        <div className="space-y-2.5">
+                          <div className="grid grid-cols-2 gap-2">
+                            <select 
+                              className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
+                              value={payMethod} onChange={e => setPayMethod(e.target.value)}
+                            >
+                              <option value="cash" className="bg-[#0b0b14]">Dinheiro (Cash)</option>
+                              <option value="debit" className="bg-[#0b0b14]">Débito (Debit)</option>
+                              <option value="credit" className="bg-[#0b0b14]">Crédito (Credit)</option>
+                              <option value="pix" className="bg-[#0b0b14]">PIX</option>
+                            </select>
+                            <input 
+                              type="number" 
+                              placeholder={`Amt (Max ${remaining.toFixed(2)})`}
+                              className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
+                              value={payAmount} onChange={e => setPayAmount(e.target.value)}
+                              min="0.01" step="0.01"
+                            />
+                          </div>
+                          {payMethod === 'cash' && (
+                            <div className="mt-2">
+                              <input 
+                                type="number" 
+                                placeholder="Valor Recebido (Received Amount - Required for Change)"
+                                className="input-field h-9 w-full text-[12px] bg-white/[0.05] border-white/10 border-success/30"
+                                value={payReceived} onChange={e => setPayReceived(e.target.value)}
+                                min="0.01" step="0.01"
+                              />
+                            </div>
+                          )}
+                          <button 
+                            type="button" 
+                            className="bg-white/10 hover:bg-white/20 text-white w-full h-8 rounded-lg text-[12px] font-medium transition-colors"
+                            onClick={handleAddPayment}
+                          >
+                            Add Payment Method
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Action */}
                   <button 
-                    disabled={saveLoading || !selectedCustomer || cart.length === 0}
+                    disabled={saveLoading || !isFullyPaid || cart.length === 0}
                     onClick={handleConfirmSale}
                     className="btn-primary w-full h-12 mt-6 text-[15px] font-bold shadow-[0_8px_20px_rgba(109,106,254,0.3)] disabled:shadow-none"
                   >

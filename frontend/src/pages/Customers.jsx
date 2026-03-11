@@ -8,7 +8,7 @@ export default function Customers() {
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState(null)
-  const [form, setForm] = useState({ name: '', email: '', phone: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', observations: '' })
   const [saveLoading, setSaveLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [search, setSearch] = useState('')
@@ -32,7 +32,8 @@ export default function Customers() {
     setForm({
       name: customer ? customer.name : '',
       email: customer ? customer.email || '' : '',
-      phone: customer ? customer.phone || '' : ''
+      phone: customer ? customer.phone || '' : '',
+      observations: customer ? customer.observations || '' : ''
     })
     setModalOpen(true)
   }
@@ -215,6 +216,15 @@ export default function Customers() {
                     className="input-field"
                   />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-text-tertiary">Observations</label>
+                <textarea 
+                  value={form.observations} 
+                  onChange={e => setForm({ ...form, observations: e.target.value })}
+                  placeholder="Notes about the customer..."
+                  className="input-field min-h-[60px] resize-y"
+                />
               </div>
               <div className="flex gap-2 pt-3">
                 <button type="submit" disabled={saveLoading || !form.name.trim()} className="btn-primary flex-1">
