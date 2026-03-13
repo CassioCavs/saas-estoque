@@ -20,8 +20,10 @@ const TrashIcon = ({ size = 13 }) => (
 )
 
 /* ── Stock badge ────────────────────────────────────────────────────── */
-function StockBadge({ stock }) {
+function StockBadge({ stock, unit = 'un' }) {
   const s = Number(stock)
+  const displayUnit = unit === 'un' ? '' : ` ${unit}`
+  
   if (s === 0) return (
     <span className="badge text-danger" style={{ background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.22)' }}>
       <span className="w-1 h-1 rounded-full bg-danger opacity-80" />
@@ -31,13 +33,13 @@ function StockBadge({ stock }) {
   if (s <= 5) return (
     <span className="badge text-warning" style={{ background: 'rgba(245,158,11,0.09)', border: '1px solid rgba(245,158,11,0.22)' }}>
       <span className="w-1 h-1 rounded-full bg-warning opacity-80" />
-      Low · {s}
+      Low · {s}{displayUnit}
     </span>
   )
   return (
     <span className="badge text-success" style={{ background: 'rgba(34,197,94,0.09)', border: '1px solid rgba(34,197,94,0.2)' }}>
       <span className="w-1 h-1 rounded-full bg-success opacity-80" />
-      {s}
+      {s}{displayUnit}
     </span>
   )
 }
@@ -257,7 +259,7 @@ export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
 
               {/* Stock */}
               <div>
-                <StockBadge stock={product.stock} />
+                <StockBadge stock={product.stock} unit={product.unit_type} />
               </div>
 
               {/* Actions */}

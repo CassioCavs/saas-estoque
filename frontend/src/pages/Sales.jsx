@@ -64,14 +64,35 @@ export default function Sales() {
   const updateCartQuantity = (productId, delta) => {
     setCart(prev => prev.map(item => {
       if (item.product_id === productId) {
-        const newQty = Math.max(1, item.quantity + delta)
+        // use 0 threshold for fractional items so they can't go below 0
+        const minQty = 0
+        const newQty = Math.max(minQty, item.quantity + delta)
         return { ...item, quantity: newQty }
       }
       return item
-    }).filter(item => item.quantity > 0))
+    }))
   }
 
-  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart])
+  const setCartQtyDirect = (productId, val) => {
+    if (val === '') {
+      setCart(prev => prev.map(item => item.product_id === productId ? { ...item, quantity: '' } : item))
+      return
+    }
+    let num = Number(val)
+    if (isNaN(num) || num < 0) return
+    setCart(prev => prev.map(item => {
+      if (item.product_id === productId) {
+        return { ...item, quantity: num > item.max_stock ? item.max_stock : num }
+      }
+      return item
+    }))
+  }
+
+  const removeFromCart = (productId) => {
+    setCart(prev => prev.filter(item => item.product_id !== productId))
+  }
+
+  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * (Number(item.quantity) || 0)), 0), [cart])
   
   const paymentsTotal = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments])
   const remaining = Math.max(0, cartTotal - paymentsTotal)
@@ -105,6 +126,10 @@ export default function Sales() {
       alert('Your cart is empty')
       return
     }
+    if (cart.some(item => !item.quantity || Number(item.quantity) <= 0)) {
+      alert('One or more items in the cart have an invalid quantity.')
+      return
+    }
     if (!isFullyPaid) {
       alert('Order is not fully paid yet')
       return
@@ -119,7 +144,7 @@ export default function Sales() {
         customer_id: selectedCustomer?.id || null,
         items: cart.map(item => ({
           product_id: item.product_id,
-          quantity: item.quantity,
+          quantity: Number(item.quantity),
           price: item.price
         })),
         amount_received: totalAmountReceived,
@@ -161,9 +186,23 @@ export default function Sales() {
         name: product.name,
         price: product.price,
         quantity: 1,
-        max_stock: product.stock
+        max_stock: product.stock,
+        unit_type: product.unit_type,
+        allow_fraction: product.allow_fraction
       }]
     })
+  }
+
+  const handleBarcodeScan = (e) => {
+    if (e.key === 'Enter' && pdvSearch.trim()) {
+      const s = pdvSearch.trim()
+      // look for exact barcode match first
+      const exactMatch = products.find(p => p.barcode === s)
+      if (exactMatch) {
+         addToCart(exactMatch)
+         setPdvSearch('')
+      }
+    }
   }
 
   const filteredPdvProducts = useMemo(() => {
@@ -286,10 +325,11 @@ export default function Sales() {
                   </svg>
                   <input 
                     type="text" 
-                    placeholder="Search products by name or barcode..." 
+                    placeholder="Search explicitly or Scan Barcode (Press Enter)..." 
                     className="input-field pl-10 h-11 bg-white/[0.03] border-white/10 text-[14px]"
                     value={pdvSearch}
                     onChange={e => setPdvSearch(e.target.value)}
+                    onKeyDown={handleBarcodeScan}
                     autoFocus
                   />
                 </div>
@@ -385,15 +425,35 @@ export default function Sales() {
                             <h5 className="text-[12px] font-semibold text-text-primary truncate">{item.name}</h5>
                             <span className="text-[11px] font-mono text-accent">${item.price.toFixed(2)}</span>
                           </div>
-                          <div className="flex items-center gap-2 bg-black/20 rounded-lg p-1 border border-white/5">
-                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-white transition-colors">-</button>
-                            <span className="text-[11px] font-bold min-w-[16px] text-center">{item.quantity}</span>
+                          <div className="flex items-center gap-1.5 bg-black/20 rounded-lg p-1 border border-white/5">
+                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-6 h-6 rounded flex items-center justify-center text-white bg-white/5 hover:bg-white/10 transition-colors">-</button>
+                            <div className="relative">
+                              <input 
+                                type="number" 
+                                className="w-14 text-center bg-transparent text-[11px] font-bold text-white outline-none" 
+                                value={item.quantity}
+                                onChange={(e) => setCartQtyDirect(item.product_id, e.target.value)}
+                                step={item.allow_fraction ? "0.01" : "1"}
+                                min="0"
+                              />
+                              <span className="absolute -bottom-2.5 left-0 right-0 text-center text-[8px] text-text-muted uppercase font-mono">{item.unit_type}</span>
+                            </div>
                             <button 
                               onClick={() => updateCartQuantity(item.product_id, 1)} 
                               disabled={item.quantity >= item.max_stock}
-                              className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-6 h-6 rounded flex items-center justify-center text-white bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             >+</button>
                           </div>
+                          
+                          <button 
+                            onClick={() => removeFromCart(item.product_id)} 
+                            className="w-8 h-8 rounded shrink-0 flex items-center justify-center text-danger hover:bg-danger/10 transition-colors"
+                            title="Remove item"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                              <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
                       ))
                     )}

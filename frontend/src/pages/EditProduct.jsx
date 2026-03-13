@@ -112,6 +112,9 @@ export default function EditProduct() {
               profit_margin: product?.profit_margin ?? '',
               sale_price: product?.sale_price ?? '',
               stock: product?.stock ?? '',
+              min_stock: product?.min_stock ?? '',
+              barcode: product?.barcode ?? '',
+              unit_type: product?.unit_type ?? 'un',
               category_id: product?.category_id ?? ''
             }}
             onSubmit={handleSubmit}

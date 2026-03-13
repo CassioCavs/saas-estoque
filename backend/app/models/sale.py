@@ -25,7 +25,7 @@ class SaleItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     sale_id = Column(Integer, ForeignKey("sales.id"), nullable=False, index=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
-    quantity = Column(Integer, nullable=False)
+    quantity = Column(Float, nullable=False)
     price = Column(Float, nullable=False)
 
     sale = relationship("Sale", back_populates="items")

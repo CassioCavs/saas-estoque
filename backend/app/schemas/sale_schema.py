@@ -5,7 +5,7 @@ from .customer_schema import CustomerResponse
 
 class SaleItemCreate(BaseModel):
     product_id: int = Field(..., gt=0)
-    quantity: int = Field(..., gt=0)
+    quantity: float = Field(..., gt=0)
 
 class PaymentCreate(BaseModel):
     method: str = Field(..., min_length=1)
@@ -21,7 +21,7 @@ class SaleCreate(BaseModel):
 class SaleItemResponse(BaseModel):
     id: int
     product_id: int
-    quantity: int
+    quantity: float
     price: float
 
     class Config:

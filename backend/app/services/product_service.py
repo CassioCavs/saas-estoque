@@ -23,6 +23,11 @@ def calculate_prices(data: dict) -> dict:
     return data
 
 def create_product(db: Session, product: ProductCreate, user_id: int) -> Product:
+    if product.barcode:
+        existing = db.query(Product).filter(Product.user_id == user_id, Product.barcode == product.barcode).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Barcode already in use.")
+
     product_data = product.dict()
     product_data = calculate_prices(product_data)
     
@@ -75,6 +80,11 @@ def get_product_by_id(db: Session, product_id: int, user_id: int) -> Product:
 def update_product(db: Session, product_id: int, product_update: ProductUpdate, user_id: int) -> Product:
     product = get_product_by_id(db, product_id, user_id)
     
+    if product_update.barcode and product_update.barcode != product.barcode:
+        existing = db.query(Product).filter(Product.user_id == user_id, Product.barcode == product_update.barcode).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Barcode already in use.")
+            
     update_data = product_update.dict(exclude_unset=True)
     
     cost = update_data.get("cost_price", product.cost_price)

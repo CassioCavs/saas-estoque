@@ -9,9 +9,11 @@ class ProductCreate(BaseModel):
     cost_price: float | None = Field(None, ge=0)
     profit_margin: float | None = Field(None)
     sale_price: float = Field(..., ge=0)
-    stock: int = Field(0, ge=0)
-    min_stock: int = Field(0, ge=0)
+    stock: float = Field(0, ge=0)
+    min_stock: float = Field(0, ge=0)
     barcode: str | None = None
+    unit_type: str = Field("un", min_length=1)
+    allow_fraction: bool = False
     category_id: int | None = None
 
 class ProductResponse(BaseModel):
@@ -22,9 +24,11 @@ class ProductResponse(BaseModel):
     cost_price: float | None = None
     profit_margin: float | None = None
     sale_price: float
-    stock: int
-    min_stock: int
+    stock: float
+    min_stock: float
     barcode: str | None
+    unit_type: str
+    allow_fraction: bool
     category_id: int | None
     category_relation: CategoryResponse | None = None
     user_id: int
@@ -40,7 +44,9 @@ class ProductUpdate(BaseModel):
     cost_price: float | None = Field(None, ge=0)
     profit_margin: float | None = Field(None)
     sale_price: float | None = Field(None, ge=0)
-    stock: int | None = Field(None, ge=0)
-    min_stock: int | None = Field(None, ge=0)
+    stock: float | None = Field(None, ge=0)
+    min_stock: float | None = Field(None, ge=0)
     barcode: str | None = None
+    unit_type: str | None = Field(None, min_length=1)
+    allow_fraction: bool | None = None
     category_id: int | None = None

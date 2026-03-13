@@ -10,7 +10,9 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
     profit_margin: '',
     sale_price: '',
     stock: '',
-    category_id: '',
+    min_stock: '',
+    barcode: '',
+    unit_type: 'un',
     ...initialValues
   })
   const [categories, setCategories] = useState([])
@@ -93,10 +95,15 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       sale_price: Number(form.sale_price),
       price: Number(form.sale_price), // Mantém price para compatibilidade
       stock: Number(form.stock),
+      min_stock: Number(form.min_stock || 0),
+      barcode: form.barcode.trim() || null,
+      unit_type: form.unit_type,
+      allow_fraction: form.unit_type !== 'un',
       category_id: form.category_id ? Number(form.category_id) : null,
     })
   }
 
+  const isFractional = form.unit_type !== 'un'
   const totalValue = (Number(form.sale_price || 0) * Number(form.stock || 0)).toFixed(2)
   const showPreview = form.sale_price !== '' && form.stock !== '' && !fieldErrors.sale_price && !fieldErrors.stock
 
@@ -148,6 +155,40 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
         </div>
       </Field>
 
+      <div className="grid grid-cols-2 gap-3">
+        {/* Barcode */}
+        <Field label="Barcode (Optional)">
+          <input
+            id="barcode" name="barcode" type="text"
+            value={form.barcode} onChange={handleChange} onBlur={handleBlur}
+            placeholder="Scan or type..."
+            className="input-field"
+          />
+        </Field>
+
+        {/* Unit Type */}
+        <Field label="Measurement Unit">
+          <div className="relative group">
+            <select
+              id="unit_type" name="unit_type"
+              value={form.unit_type} onChange={handleChange}
+              className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+            >
+              <option value="un" className="bg-[#0b0b14]">Unit (un)</option>
+              <option value="kg" className="bg-[#0b0b14]">Kilogram (kg)</option>
+              <option value="g" className="bg-[#0b0b14]">Gram (g)</option>
+              <option value="l" className="bg-[#0b0b14]">Liter (l)</option>
+              <option value="m" className="bg-[#0b0b14]">Meter (m)</option>
+            </select>
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
+              <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 1l4 4 4-4" />
+              </svg>
+            </div>
+          </div>
+        </Field>
+      </div>
+
       {/* Prices Logic */}
       <div className="grid grid-cols-3 gap-3">
         <Field label="Cost (USD)" error={touched.cost_price && fieldErrors.cost_price}>
@@ -190,21 +231,31 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       {/* Stock */}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Current Stock" required error={touched.stock && fieldErrors.stock}>
-          <input
-            id="stock" name="stock" type="number" min="0" step="1"
-            value={form.stock} onChange={handleChange} onBlur={handleBlur}
-            placeholder="0"
-            className={`input-field ${touched.stock && fieldErrors.stock ? 'error' : ''}`}
-          />
+          <div className="relative">
+            <input
+              id="stock" name="stock" type="number" min="0" step={isFractional ? "0.01" : "1"}
+              value={form.stock} onChange={handleChange} onBlur={handleBlur}
+              placeholder="0"
+              className={`input-field pr-8 ${touched.stock && fieldErrors.stock ? 'error' : ''}`}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-[11px] select-none pointer-events-none font-mono uppercase">
+              {form.unit_type}
+            </span>
+          </div>
         </Field>
         
         <Field label="Min. Stock">
-          <input
-            id="min_stock" name="min_stock" type="number" min="0" step="1"
-            value={form.min_stock || ''} onChange={handleChange}
-            placeholder="0"
-            className="input-field"
-          />
+          <div className="relative">
+            <input
+              id="min_stock" name="min_stock" type="number" min="0" step={isFractional ? "0.01" : "1"}
+              value={form.min_stock} onChange={handleChange}
+              placeholder="0"
+              className="input-field pr-8"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-[11px] select-none pointer-events-none font-mono uppercase">
+              {form.unit_type}
+            </span>
+          </div>
         </Field>
       </div>
 

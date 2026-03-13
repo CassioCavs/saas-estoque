@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
 
 class Product(Base):
     __tablename__ = "products"
+    __table_args__ = (UniqueConstraint('user_id', 'barcode', name='uq_user_barcode'),)
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -13,9 +14,11 @@ class Product(Base):
     cost_price = Column(Float, nullable=False, default=0.0)
     profit_margin = Column(Float, nullable=False, default=0.0)
     sale_price = Column(Float, nullable=False, default=0.0)
-    stock = Column(Integer, nullable=False, default=0)
-    min_stock = Column(Integer, nullable=False, default=0)
-    barcode = Column(String, unique=True, index=True)
+    stock = Column(Float, nullable=False, default=0.0)
+    min_stock = Column(Float, nullable=False, default=0.0)
+    barcode = Column(String, index=True)
+    unit_type = Column(String, nullable=False, default="un")
+    allow_fraction = Column(Boolean, nullable=False, default=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
