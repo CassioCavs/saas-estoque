@@ -11,6 +11,7 @@ class Customer(Base):
     name = Column(String, nullable=False)
     email = Column(String, index=True)
     phone = Column(String)
+    observations = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User")

@@ -20,8 +20,10 @@ const TrashIcon = ({ size = 13 }) => (
 )
 
 /* ── Stock badge ────────────────────────────────────────────────────── */
-function StockBadge({ stock }) {
+function StockBadge({ stock, unit = 'un' }) {
   const s = Number(stock)
+  const displayUnit = unit === 'un' ? '' : ` ${unit}`
+  
   if (s === 0) return (
     <span className="badge text-danger" style={{ background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.22)' }}>
       <span className="w-1 h-1 rounded-full bg-danger opacity-80" />
@@ -31,13 +33,13 @@ function StockBadge({ stock }) {
   if (s <= 5) return (
     <span className="badge text-warning" style={{ background: 'rgba(245,158,11,0.09)', border: '1px solid rgba(245,158,11,0.22)' }}>
       <span className="w-1 h-1 rounded-full bg-warning opacity-80" />
-      Low · {s}
+      Low · {s}{displayUnit}
     </span>
   )
   return (
     <span className="badge text-success" style={{ background: 'rgba(34,197,94,0.09)', border: '1px solid rgba(34,197,94,0.2)' }}>
       <span className="w-1 h-1 rounded-full bg-success opacity-80" />
-      {s}
+      {s}{displayUnit}
     </span>
   )
 }
@@ -93,14 +95,14 @@ function TableSkeleton() {
   return (
     <div className="card overflow-hidden">
       {/* Header */}
-      <div className="grid gap-4 px-5 py-3" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="grid gap-4 px-5 py-3" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid var(--color-border)' }}>
         {['w-12','w-8','w-16','w-10'].map((w, i) => (
           <div key={i} className={`h-2.5 skeleton ${w}`} />
         ))}
       </div>
       {/* Rows */}
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="grid gap-4 px-5 py-[14px] items-center" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid rgba(255,255,255,0.04)', animationDelay: `${i*0.06}s` }}>
+        <div key={i} className="grid gap-4 px-5 py-[14px] items-center" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid var(--color-border-subtle)', animationDelay: `${i*0.06}s` }}>
           <div className="space-y-1.5">
             <div className="skeleton h-2.5" style={{ width: `${48 + (i * 17) % 40}%` }} />
             <div className="skeleton h-2 w-14" />
@@ -173,7 +175,7 @@ function ColHeader({ children, align = 'left' }) {
 }
 
 /* ── Main ───────────────────────────────────────────────────────────── */
-export default function ProductsTable({ products, loading, onRefresh }) {
+export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
   const navigate = useNavigate()
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -196,7 +198,7 @@ export default function ProductsTable({ products, loading, onRefresh }) {
   }
 
   if (loading) return <TableSkeleton />
-  if (!products || products.length === 0) return <EmptyState onAdd={() => navigate('/create-product')} />
+  if (!products || products.length === 0) return <EmptyState onAdd={onAdd || (() => navigate('/create-product'))} />
 
   const totalValue = products.reduce((s, p) => s + Number(p.price) * Number(p.stock), 0)
 
@@ -208,8 +210,8 @@ export default function ProductsTable({ products, loading, onRefresh }) {
           className="grid gap-4 px-5 py-[11px] items-center"
           style={{
             gridTemplateColumns: '1fr 110px 150px 88px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(255,255,255,0.015)',
+            borderBottom: '1px solid var(--color-border)',
+            background: 'var(--color-badge-bg)',
           }}
         >
           <ColHeader>Product</ColHeader>
@@ -227,14 +229,14 @@ export default function ProductsTable({ products, loading, onRefresh }) {
               className="grid gap-4 px-5 items-center row-reveal group relative"
               style={{
                 gridTemplateColumns: '1fr 110px 150px 88px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                borderBottom: '1px solid var(--color-border-subtle)',
                 animationDelay: `${idx * 28}ms`,
                 height: '52px',
                 transition: 'background 0.12s, opacity 0.3s',
                 background: isLeaving ? 'rgba(239,68,68,0.05)' : 'transparent',
                 opacity: isLeaving ? 0.4 : 1,
               }}
-              onMouseEnter={e => { if (!isLeaving) e.currentTarget.style.background = 'rgba(255,255,255,0.025)' }}
+              onMouseEnter={e => { if (!isLeaving) e.currentTarget.style.background = 'var(--color-nav-hover-bg)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
             >
               {/* Left accent line on hover */}
@@ -257,7 +259,7 @@ export default function ProductsTable({ products, loading, onRefresh }) {
 
               {/* Stock */}
               <div>
-                <StockBadge stock={product.stock} />
+                <StockBadge stock={product.stock} unit={product.unit_type} />
               </div>
 
               {/* Actions */}
@@ -290,7 +292,7 @@ export default function ProductsTable({ products, loading, onRefresh }) {
         {/* ── Footer ── */}
         <div
           className="flex items-center justify-between px-5 py-[10px]"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.055)', background: 'rgba(255,255,255,0.01)' }}
+          style={{ borderTop: '1px solid var(--color-border)', background: 'var(--color-badge-bg)' }}
         >
           <span className="text-[11px] text-text-muted">
             {products.length} {products.length === 1 ? 'product' : 'products'}

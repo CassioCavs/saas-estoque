@@ -49,7 +49,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: '#08080e' }}>
+      style={{ background: 'var(--color-surface-0)', transition: 'background 0.25s ease' }}>
 
       {/* Grid pattern */}
       <div className="absolute inset-0 opacity-[0.018]" style={{

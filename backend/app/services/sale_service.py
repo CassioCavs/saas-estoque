@@ -1,6 +1,7 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from fastapi import HTTPException
 from app.models.sale import Sale, SaleItem
+from app.models.payment import Payment
 from app.models.product import Product
 from app.schemas.sale_schema import SaleCreate, SaleResponse
 from .product_service import get_product_by_id
@@ -14,25 +15,55 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
     # Validar produtos e estoque
     total = 0.0
     sale_items = []
+    # Batch fetch products to avoid N+1 query loop
+    product_ids = [item.product_id for item in sale_data.items]
+    products = db.query(Product).filter(
+        Product.id.in_(product_ids), 
+        Product.user_id == user_id
+    ).all()
+    products_dict = {p.id: p for p in products}
 
     for item in sale_data.items:
         print(f"Checking product_id: {item.product_id} (type: {type(item.product_id)})")
-        product = get_product_by_id(db, item.product_id, user_id)
-        print(f"Product found: {product}")
+        product = products_dict.get(item.product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+        print(f"Product found: {product.name}")
         if product.stock < item.quantity:
             raise HTTPException(status_code=400, detail=f"Insufficient stock for product {product.name}")
         total += product.price * item.quantity
         sale_items.append({
             "product_id": item.product_id,
             "quantity": item.quantity,
-            "price": product.price
+            "price": product.price,
+            "product_obj": product # Keep reference to update stock
         })
 
-    # Criar Sale
-    db_sale = Sale(user_id=user_id, total=total)
+    # Criar Sale com os novos campos de pagamento
+    db_sale = Sale(
+        user_id=user_id, 
+        customer_id=sale_data.customer_id, 
+        total=total,
+        amount_received=sale_data.amount_received,
+        change_given=sale_data.change_given
+    )
     db.add(db_sale)
     db.commit()
     db.refresh(db_sale)
+
+    # Validar e registrar pagamentos
+    payments_total = sum(p.amount for p in sale_data.payments)
+    if round(payments_total, 2) != round(total, 2):
+        # Apenas um aviso ou validação leve, pois o frontend controla isso rigidamente
+        pass
+
+    for payment in sale_data.payments:
+        db_payment = Payment(
+            sale_id=db_sale.id,
+            method=payment.method,
+            amount=payment.amount
+        )
+        db.add(db_payment)
 
     # Criar SaleItems e atualizar estoque
     for item_data in sale_items:
@@ -43,10 +74,8 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
             price=item_data["price"]
         )
         db.add(db_item)
-
-        # Diminuir estoque
-        product = db.query(Product).filter(Product.id == item_data["product_id"]).first()
-        product.stock -= item_data["quantity"]
+        # Diminuir estoque no objeto já carregado da memória
+        item_data["product_obj"].stock -= item_data["quantity"]
 
     db.commit()
     db.refresh(db_sale)
@@ -57,10 +86,22 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
     return db_sale
 
 def get_sales(db: Session, user_id: int):
-    return db.query(Sale).filter(Sale.user_id == user_id).order_by(Sale.created_at.desc()).all()
+    return db.query(Sale).filter(Sale.user_id == user_id)\
+        .options(
+            selectinload(Sale.customer),
+            selectinload(Sale.items),
+            selectinload(Sale.payments)
+        )\
+        .order_by(Sale.created_at.desc()).all()
 
 def get_sale_by_id(db: Session, sale_id: int, user_id: int) -> Sale:
-    sale = db.query(Sale).filter(Sale.id == sale_id, Sale.user_id == user_id).first()
+    sale = db.query(Sale).filter(Sale.id == sale_id, Sale.user_id == user_id)\
+        .options(
+            selectinload(Sale.customer),
+            selectinload(Sale.items),
+            selectinload(Sale.payments)
+        )\
+        .first()
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
     return sale

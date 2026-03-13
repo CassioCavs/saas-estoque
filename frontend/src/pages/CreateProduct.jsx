@@ -28,7 +28,7 @@ export default function CreateProduct() {
 
         <div className="card overflow-hidden">
           {/* Card header */}
-          <div className="px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--color-border)' }}>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center text-accent flex-shrink-0"
                 style={{ background: 'rgba(109,106,254,0.1)', border: '1px solid rgba(109,106,254,0.2)' }}>
@@ -58,7 +58,7 @@ export function Breadcrumb({ items, navigate }) {
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && (
-            <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" strokeWidth={2}>
+            <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="var(--color-text-muted)" strokeWidth={2}>
               <path d="M9 18l6-6-6-6" />
             </svg>
           )}

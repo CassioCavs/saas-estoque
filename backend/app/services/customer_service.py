@@ -13,7 +13,13 @@ def create_customer(db: Session, customer: CustomerCreate, user_id: int) -> Cust
     return db_customer
 
 def get_customers(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return db.query(Customer).filter(Customer.user_id == user_id).offset(skip).limit(limit).all()
+    return db.query(Customer).filter(Customer.user_id == user_id).order_by(Customer.created_at.desc()).offset(skip).limit(limit).all()
+
+def search_customers(db: Session, user_id: int, name: str, limit: int = 10):
+    return db.query(Customer).filter(
+        Customer.user_id == user_id,
+        Customer.name.ilike(f"%{name}%")
+    ).limit(limit).all()
 
 def get_customer_by_id(db: Session, customer_id: int, user_id: int) -> Customer:
     customer = db.query(Customer).filter(Customer.id == customer_id, Customer.user_id == user_id).first()

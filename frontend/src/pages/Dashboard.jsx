@@ -12,7 +12,7 @@ function StatCard({ label, value, sub, accent, icon, loading, delay = 0 }) {
       style={{ animationDelay: `${delay}ms`, transition: 'transform 0.18s, box-shadow 0.18s' }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.1), 0 6px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
+        e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = ''
@@ -52,8 +52,8 @@ function QuickAction({ label, desc, onClick, icon, delay = 0 }) {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-        e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.45)'
+        e.currentTarget.style.background = 'var(--color-nav-hover-bg)'
+        e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = ''
@@ -89,11 +89,11 @@ function RecentRow({ product, index, onClick }) {
       onClick={onClick}
       className="flex items-center px-4 py-3 cursor-pointer group row-reveal"
       style={{
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        borderBottom: '1px solid var(--color-border-subtle)',
         animationDelay: `${index * 35}ms`,
         transition: 'background 0.1s',
       }}
-      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'}
       onMouseLeave={e => e.currentTarget.style.background = ''}
     >
       <div className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center mr-3 flex-shrink-0"
@@ -221,7 +221,7 @@ export default function Dashboard() {
                 {products.length > 6 && (
                   <button onClick={() => navigate('/products')}
                     className="w-full px-4 py-3 text-[11px] text-text-muted hover:text-accent transition-colors duration-120 flex items-center justify-center gap-1.5"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}>
+                    style={{ borderTop: '1px solid var(--color-border-subtle)', background: 'var(--color-badge-bg)' }}>
                     View all {products.length} products
                     <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path d="M5 12h14M12 5l7 7-7 7" />

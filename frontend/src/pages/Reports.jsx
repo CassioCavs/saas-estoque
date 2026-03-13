@@ -86,19 +86,19 @@ export default function Reports() {
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topProducts} layout="vertical" margin={{ left: 40, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={true} vertical={false} />
                 <XAxis type="number" hide />
                 <YAxis 
                   dataKey="product_name" 
                   type="category" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
                   width={100}
                 />
                 <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                  contentStyle={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px' }}
+                  cursor={{ fill: 'var(--color-badge-bg)' }}
+                  contentStyle={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: '12px', fontSize: '12px' }}
                 />
                 <Bar dataKey="total_sold" radius={[0, 4, 4, 0]} barSize={24}>
                   {topProducts.map((entry, index) => (
@@ -133,7 +133,7 @@ export default function Reports() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px' }}
+                    contentStyle={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: '12px', fontSize: '12px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>

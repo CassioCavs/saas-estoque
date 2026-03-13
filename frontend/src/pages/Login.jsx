@@ -44,7 +44,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: '#08080e' }}>
+      style={{ background: 'var(--color-surface-0)', transition: 'background 0.25s ease' }}>
 
       {/* Grid pattern */}
       <div className="absolute inset-0 opacity-[0.018]" style={{
@@ -73,7 +73,7 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div className="card p-5" style={{ background: 'rgba(255,255,255,0.03)', boxShadow: '0 0 0 1px rgba(255,255,255,0.09), 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+        <div className="card p-5" style={{ background: 'var(--color-card-bg)', boxShadow: 'var(--shadow-card)' }}>
           {/* Success message */}
           {successMessage && (
             <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-[12px] text-success animate-fade-in mb-4"

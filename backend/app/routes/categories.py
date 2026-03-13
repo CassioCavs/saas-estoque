@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.category_schema import CategoryCreate, CategoryResponse, CategoryUpdate
+from app.schemas.product_schema import ProductResponse
 from app.models.user import User
 from app.auth import get_db, get_current_user
 from app.services.category_service import (
@@ -9,7 +10,8 @@ from app.services.category_service import (
     get_categories,
     get_category_by_id,
     update_category,
-    delete_category
+    delete_category,
+    get_products_by_category
 )
 
 router = APIRouter()
@@ -56,3 +58,11 @@ def delete_category_endpoint(
 ):
     delete_category(db, category_id, current_user.id)
     return {"message": "Category deleted successfully"}
+
+@router.get("/{category_id}/products", response_model=List[ProductResponse])
+def get_category_products_endpoint(
+    category_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return get_products_by_category(db, category_id, current_user.id)

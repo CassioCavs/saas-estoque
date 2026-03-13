@@ -4,8 +4,34 @@ from app.models.product import Product
 from app.schemas.product_schema import ProductCreate, ProductUpdate
 from .activity_log_service import log_activity
 
+def calculate_prices(data: dict) -> dict:
+    cost = data.get("cost_price") or 0.0
+    margin = data.get("profit_margin") or 0.0
+    sale = data.get("sale_price") or 0.0
+
+    if "profit_margin" in data or "cost_price" in data:
+        if cost > 0 and margin is not None:
+            sale = cost * (1 + margin / 100)
+            data["sale_price"] = round(sale, 2)
+            data["price"] = data["sale_price"]
+    elif "sale_price" in data:
+        if cost > 0:
+            margin = ((sale - cost) / cost) * 100
+            data["profit_margin"] = round(margin, 2)
+        data["price"] = sale
+            
+    return data
+
 def create_product(db: Session, product: ProductCreate, user_id: int) -> Product:
-    db_product = Product(**product.dict(), user_id=user_id)
+    if product.barcode:
+        existing = db.query(Product).filter(Product.user_id == user_id, Product.barcode == product.barcode).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Barcode already in use.")
+
+    product_data = product.dict()
+    product_data = calculate_prices(product_data)
+    
+    db_product = Product(**product_data, user_id=user_id)
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
@@ -53,8 +79,36 @@ def get_product_by_id(db: Session, product_id: int, user_id: int) -> Product:
 
 def update_product(db: Session, product_id: int, product_update: ProductUpdate, user_id: int) -> Product:
     product = get_product_by_id(db, product_id, user_id)
-    for key, value in product_update.dict(exclude_unset=True).items():
+    
+    if product_update.barcode and product_update.barcode != product.barcode:
+        existing = db.query(Product).filter(Product.user_id == user_id, Product.barcode == product_update.barcode).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Barcode already in use.")
+            
+    update_data = product_update.dict(exclude_unset=True)
+    
+    cost = update_data.get("cost_price", product.cost_price)
+    if cost is None: cost = 0.0
+    
+    margin = update_data.get("profit_margin", product.profit_margin)
+    if margin is None: margin = 0.0
+    
+    sale = update_data.get("sale_price", product.sale_price)
+
+    if "cost_price" in update_data or "profit_margin" in update_data:
+        if cost > 0:
+            new_sale = cost * (1 + margin / 100)
+            update_data["sale_price"] = round(new_sale, 2)
+            update_data["price"] = update_data["sale_price"]
+    elif "sale_price" in update_data:
+        if cost > 0:
+            new_margin = ((sale - cost) / cost) * 100
+            update_data["profit_margin"] = round(new_margin, 2)
+        update_data["price"] = sale
+
+    for key, value in update_data.items():
         setattr(product, key, value)
+        
     db.commit()
     db.refresh(product)
     log_activity(db, user_id, "update_product", "product", product_id)

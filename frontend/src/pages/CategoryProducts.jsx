@@ -1,48 +1,64 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import ProductsTable from '../components/ProductsTable'
-import { productsService, getErrorMessage } from '../services/api'
+import { categoriesService, getErrorMessage } from '../services/api'
 
-export default function Products() {
+export default function CategoryProducts() {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const [products, setProducts]     = useState([])
+  const [products, setProducts] = useState([])
+  const [category, setCategory] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [search, setSearch]   = useState('')
+  const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
   const [spinning, setSpinning] = useState(false)
 
-  const fetchProducts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true); setError('')
     try {
-      const { data } = await productsService.getAll()
-      setProducts(Array.isArray(data) ? data : data.products ?? data.data ?? [])
+      const [catRes, prodRes] = await Promise.all([
+        categoriesService.getById(id),
+        categoriesService.getProducts(id)
+      ])
+      setCategory(catRes.data)
+      setProducts(prodRes.data)
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load products.'))
+      setError(getErrorMessage(err, 'Failed to load category products.'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [id])
 
-  useEffect(() => { fetchProducts() }, [fetchProducts])
+  useEffect(() => { fetchData() }, [fetchData])
 
   const handleRefresh = async () => {
     setSpinning(true)
-    await fetchProducts()
+    await fetchData()
     setTimeout(() => setSpinning(false), 400)
   }
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return products
-    const s = search.toLowerCase()
-    return products.filter(p => p.name.toLowerCase().includes(s))
-  }, [products, search])
+  const filtered = search.trim()
+    ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    : products
 
   return (
-    <Layout title="Products" subtitle="Manage your inventory">
-
-      {/* ── Toolbar ── */}
+    <Layout 
+      title={category ? `Category: ${category.name}` : 'Category Products'} 
+      subtitle={category?.description || 'View products in this category'}
+    >
       <div className="flex items-center gap-2.5 mb-5">
+        <button 
+          onClick={() => navigate('/categories')}
+          className="btn-secondary px-3 py-1.5 h-auto text-[11px]"
+        >
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+
+        <div className="h-4 w-[1px] bg-white/10 mx-1" />
 
         {/* Search */}
         <div className="relative flex-1 max-w-[260px]">
@@ -52,7 +68,7 @@ export default function Products() {
           </svg>
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search products…"
+            placeholder="Search in category…"
             className="input-field pl-8 pr-8"
           />
           {search && (
@@ -77,7 +93,6 @@ export default function Products() {
         )}
 
         <div className="ml-auto flex items-center gap-2">
-          {/* Refresh */}
           <button onClick={handleRefresh} disabled={loading} className="btn-secondary" title="Refresh">
             <svg
               width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -89,7 +104,6 @@ export default function Products() {
             Refresh
           </button>
 
-          {/* Add */}
           <button className="btn-primary" onClick={() => navigate('/create-product')}>
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -99,41 +113,13 @@ export default function Products() {
         </div>
       </div>
 
-      {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2.5 px-3.5 py-3 rounded-[10px] mb-4 text-[12px] text-danger animate-fade-in"
-          style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)' }}>
-          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
+        <div className="mb-5 px-4 py-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
           {error}
-          <button onClick={fetchProducts} className="ml-auto text-[11px] underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity">
-            Retry
-          </button>
         </div>
       )}
 
-      {/* ── No search results ── */}
-      {!loading && search && filtered.length === 0 && products.length > 0 && (
-        <div className="card py-12 flex flex-col items-center text-center mb-4 animate-fade-in">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--color-text-muted)" strokeWidth={1.5} className="mb-3">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <p className="text-[13px] font-medium text-text-secondary">No results for "{search}"</p>
-          <p className="text-[11px] text-text-muted mt-1 mb-4">Try a different search term</p>
-          <button className="btn-secondary text-[12px]" onClick={() => setSearch('')}>Clear search</button>
-        </div>
-      )}
-
-      {/* ── Table ── */}
-      {(filtered.length > 0 || loading || !search) && (
-        <ProductsTable 
-          products={filtered} 
-          loading={loading} 
-          onRefresh={fetchProducts} 
-          onAdd={() => navigate('/create-product')}
-        />
-      )}
+      <ProductsTable products={filtered} loading={loading} onRefresh={fetchData} />
     </Layout>
   )
 }

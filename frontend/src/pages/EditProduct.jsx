@@ -37,7 +37,7 @@ export default function EditProduct() {
   const renderContent = () => {
     if (fetchLoading) return (
       <div className="card overflow-hidden">
-        <div className="px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-3">
             <div className="skeleton w-8 h-8 rounded-[9px]" />
             <div className="space-y-2">
@@ -80,7 +80,7 @@ export default function EditProduct() {
     return (
       <div className="card overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-[9px] flex items-center justify-center text-accent flex-shrink-0"
               style={{ background: 'rgba(109,106,254,0.1)', border: '1px solid rgba(109,106,254,0.2)' }}>
@@ -97,7 +97,7 @@ export default function EditProduct() {
             </div>
           </div>
           <span className="text-[10px] font-mono text-text-muted px-2 py-1 rounded-md"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            style={{ background: 'var(--color-badge-bg)', border: '1px solid var(--color-border)' }}>
             #{String(id).padStart(5, '0')}
           </span>
         </div>
@@ -105,7 +105,18 @@ export default function EditProduct() {
         <div className="px-6 py-5">
           <ProductForm
             mode="edit"
-            initialValues={{ name: product?.name ?? '', price: product?.price ?? '', stock: product?.stock ?? '' }}
+            initialValues={{ 
+              name: product?.name ?? '', 
+              price: product?.price ?? '',
+              cost_price: product?.cost_price ?? '',
+              profit_margin: product?.profit_margin ?? '',
+              sale_price: product?.sale_price ?? '',
+              stock: product?.stock ?? '',
+              min_stock: product?.min_stock ?? '',
+              barcode: product?.barcode ?? '',
+              unit_type: product?.unit_type ?? 'un',
+              category_id: product?.category_id ?? ''
+            }}
             onSubmit={handleSubmit}
             loading={saveLoading}
             error={saveError}
