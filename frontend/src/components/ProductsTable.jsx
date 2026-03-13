@@ -95,14 +95,14 @@ function TableSkeleton() {
   return (
     <div className="card overflow-hidden">
       {/* Header */}
-      <div className="grid gap-4 px-5 py-3" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="grid gap-4 px-5 py-3" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid var(--color-border)' }}>
         {['w-12','w-8','w-16','w-10'].map((w, i) => (
           <div key={i} className={`h-2.5 skeleton ${w}`} />
         ))}
       </div>
       {/* Rows */}
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="grid gap-4 px-5 py-[14px] items-center" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid rgba(255,255,255,0.04)', animationDelay: `${i*0.06}s` }}>
+        <div key={i} className="grid gap-4 px-5 py-[14px] items-center" style={{ gridTemplateColumns: '1fr 110px 150px 88px', borderBottom: '1px solid var(--color-border-subtle)', animationDelay: `${i*0.06}s` }}>
           <div className="space-y-1.5">
             <div className="skeleton h-2.5" style={{ width: `${48 + (i * 17) % 40}%` }} />
             <div className="skeleton h-2 w-14" />
@@ -210,8 +210,8 @@ export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
           className="grid gap-4 px-5 py-[11px] items-center"
           style={{
             gridTemplateColumns: '1fr 110px 150px 88px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(255,255,255,0.015)',
+            borderBottom: '1px solid var(--color-border)',
+            background: 'var(--color-badge-bg)',
           }}
         >
           <ColHeader>Product</ColHeader>
@@ -229,14 +229,14 @@ export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
               className="grid gap-4 px-5 items-center row-reveal group relative"
               style={{
                 gridTemplateColumns: '1fr 110px 150px 88px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                borderBottom: '1px solid var(--color-border-subtle)',
                 animationDelay: `${idx * 28}ms`,
                 height: '52px',
                 transition: 'background 0.12s, opacity 0.3s',
                 background: isLeaving ? 'rgba(239,68,68,0.05)' : 'transparent',
                 opacity: isLeaving ? 0.4 : 1,
               }}
-              onMouseEnter={e => { if (!isLeaving) e.currentTarget.style.background = 'rgba(255,255,255,0.025)' }}
+              onMouseEnter={e => { if (!isLeaving) e.currentTarget.style.background = 'var(--color-nav-hover-bg)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
             >
               {/* Left accent line on hover */}
@@ -292,7 +292,7 @@ export default function ProductsTable({ products, loading, onRefresh, onAdd }) {
         {/* ── Footer ── */}
         <div
           className="flex items-center justify-between px-5 py-[10px]"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.055)', background: 'rgba(255,255,255,0.01)' }}
+          style={{ borderTop: '1px solid var(--color-border)', background: 'var(--color-badge-bg)' }}
         >
           <span className="text-[11px] text-text-muted">
             {products.length} {products.length === 1 ? 'product' : 'products'}

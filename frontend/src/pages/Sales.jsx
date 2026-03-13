@@ -297,10 +297,10 @@ export default function Sales() {
       {pdvOpen && (
         <div className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center md:p-6">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setPdvOpen(false)} />
-          <div className="relative bg-[#0b0b14] w-full max-w-6xl h-full md:h-[90vh] md:rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-white/10 animate-fade-up">
+          <div className="relative w-full max-w-6xl h-full md:h-[90vh] md:rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-fade-up" style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border)' }}>
             
             {/* PDV Header */}
-            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-badge-bg)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -390,7 +390,7 @@ export default function Sales() {
                           onBlur={() => setTimeout(() => setCustomerSearchFocus(false), 200)}
                         />
                         {customerSearchFocus && customerSearch && (
-                          <div className="absolute top-16 left-0 right-0 bg-[#12121c] border border-white/10 rounded-lg shadow-xl z-10 overflow-hidden max-h-[160px] overflow-y-auto">
+                          <div className="absolute top-16 left-0 right-0 rounded-lg shadow-xl z-10 overflow-hidden max-h-[160px] overflow-y-auto" style={{ background: 'var(--color-dropdown-bg)', border: '1px solid var(--color-border)' }}>
                             {filteredCustomers.length > 0 ? filteredCustomers.map(c => (
                               <button 
                                 key={c.id} 
@@ -501,10 +501,10 @@ export default function Sales() {
                               className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
                               value={payMethod} onChange={e => setPayMethod(e.target.value)}
                             >
-                              <option value="cash" className="bg-[#0b0b14]">Dinheiro (Cash)</option>
-                              <option value="debit" className="bg-[#0b0b14]">Débito (Debit)</option>
-                              <option value="credit" className="bg-[#0b0b14]">Crédito (Credit)</option>
-                              <option value="pix" className="bg-[#0b0b14]">PIX</option>
+                              <option value="cash" className="bg-surface-1">Dinheiro (Cash)</option>
+                              <option value="debit" className="bg-surface-1">Débito (Debit)</option>
+                              <option value="credit" className="bg-surface-1">Crédito (Credit)</option>
+                              <option value="pix" className="bg-surface-1">PIX</option>
                             </select>
                             <input 
                               type="number" 

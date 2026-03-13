@@ -75,7 +75,7 @@ export default function CategoryProducts() {
             <button
               onClick={() => setSearch('')}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
-              style={{ background: 'rgba(255,255,255,0.07)' }}
+              style={{ background: 'var(--color-nav-hover-bg)' }}
             >
               <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -87,7 +87,7 @@ export default function CategoryProducts() {
         {/* Count */}
         {!loading && (
           <span className="text-[11px] text-text-muted font-mono px-2.5 py-1 rounded-md select-none"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            style={{ background: 'var(--color-badge-bg)', border: '1px solid var(--color-border)' }}>
             {filtered.length}
           </span>
         )}

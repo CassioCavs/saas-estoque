@@ -142,9 +142,9 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
             disabled={fetchingCategories}
             className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
           >
-            <option value="" className="bg-[#0b0b14]">No category</option>
+            <option value="" className="bg-surface-1">No category</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id} className="bg-[#0b0b14]">{cat.name}</option>
+              <option key={cat.id} value={cat.id} className="bg-surface-1">{cat.name}</option>
             ))}
           </select>
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
@@ -174,11 +174,11 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
               value={form.unit_type} onChange={handleChange}
               className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
             >
-              <option value="un" className="bg-[#0b0b14]">Unit (un)</option>
-              <option value="kg" className="bg-[#0b0b14]">Kilogram (kg)</option>
-              <option value="g" className="bg-[#0b0b14]">Gram (g)</option>
-              <option value="l" className="bg-[#0b0b14]">Liter (l)</option>
-              <option value="m" className="bg-[#0b0b14]">Meter (m)</option>
+              <option value="un" className="bg-surface-1">Unit (un)</option>
+              <option value="kg" className="bg-surface-1">Kilogram (kg)</option>
+              <option value="g" className="bg-surface-1">Gram (g)</option>
+              <option value="l" className="bg-surface-1">Liter (l)</option>
+              <option value="m" className="bg-surface-1">Meter (m)</option>
             </select>
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
               <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

@@ -93,13 +93,14 @@ export default function Sidebar() {
     <aside
       className="fixed left-0 top-0 h-screen w-[216px] flex flex-col z-40"
       style={{
-        background: 'rgba(9,9,16,0.96)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--color-sidebar-bg)',
+        borderRight: '1px solid var(--color-border)',
         backdropFilter: 'blur(20px)',
+        transition: 'background 0.25s ease, border-color 0.25s ease',
       }}
     >
       {/* ── Logo ── */}
-      <div className="px-4 pt-5 pb-[18px]" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="px-4 pt-5 pb-[18px]" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
         <div className="flex items-center gap-2.5">
           <div className="logo-glow relative flex-shrink-0 w-[28px] h-[28px] rounded-[8px] flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, #6d6afe 0%, #9b8fff 100%)', boxShadow: '0 2px 8px rgba(109,106,254,0.35), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
@@ -111,7 +112,7 @@ export default function Sidebar() {
             <span className="text-[13px] font-semibold text-text-primary tracking-[-0.02em]">StockWise</span>
           </div>
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md text-text-muted"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            style={{ background: 'var(--color-badge-bg)', border: '1px solid var(--color-border)' }}>
             v1
           </span>
         </div>
@@ -130,7 +131,7 @@ export default function Sidebar() {
           >
             {({ isActive }) => (
               <>
-                <span style={{ color: isActive ? '#ededf2' : 'currentColor', opacity: isActive ? 1 : 0.55, transition: 'opacity 0.15s' }}>
+                <span style={{ color: isActive ? 'var(--color-text-primary)' : 'currentColor', opacity: isActive ? 1 : 0.55, transition: 'opacity 0.15s' }}>
                   <Icon />
                 </span>
                 {label}
@@ -144,7 +145,7 @@ export default function Sidebar() {
       </nav>
 
       {/* ── User footer ── */}
-      <div className="px-2.5 pb-3 pt-2 space-y-0.5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="px-2.5 pb-3 pt-2 space-y-0.5" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
         <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg group transition-colors">
           <div className="w-[26px] h-[26px] rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-semibold text-accent"
             style={{ background: 'rgba(109,106,254,0.13)', border: '1px solid rgba(109,106,254,0.22)' }}>

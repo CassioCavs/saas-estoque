@@ -59,7 +59,7 @@ export default function Products() {
             <button
               onClick={() => setSearch('')}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
-              style={{ background: 'rgba(255,255,255,0.07)' }}
+              style={{ background: 'var(--color-nav-hover-bg)' }}
             >
               <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -71,7 +71,7 @@ export default function Products() {
         {/* Count */}
         {!loading && (
           <span className="text-[11px] text-text-muted font-mono px-2.5 py-1 rounded-md select-none"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            style={{ background: 'var(--color-badge-bg)', border: '1px solid var(--color-border)' }}>
             {filtered.length}
           </span>
         )}
@@ -116,7 +116,7 @@ export default function Products() {
       {/* ── No search results ── */}
       {!loading && search && filtered.length === 0 && products.length > 0 && (
         <div className="card py-12 flex flex-col items-center text-center mb-4 animate-fade-in">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.12)" strokeWidth={1.5} className="mb-3">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--color-text-muted)" strokeWidth={1.5} className="mb-3">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <p className="text-[13px] font-medium text-text-secondary">No results for "{search}"</p>
