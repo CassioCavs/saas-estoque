@@ -107,7 +107,10 @@ export default function EditProduct() {
             mode="edit"
             initialValues={{ 
               name: product?.name ?? '', 
-              price: product?.price ?? '', 
+              price: product?.price ?? '',
+              cost_price: product?.cost_price ?? '',
+              profit_margin: product?.profit_margin ?? '',
+              sale_price: product?.sale_price ?? '',
               stock: product?.stock ?? '',
               category_id: product?.category_id ?? ''
             }}

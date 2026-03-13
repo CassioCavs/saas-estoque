@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import Layout from '../components/Layout'
 import { salesService, customersService, productsService, getErrorMessage } from '../services/api'
 
@@ -22,7 +22,6 @@ export default function Sales() {
   const [payments, setPayments] = useState([])
   const [payMethod, setPayMethod] = useState('cash')
   const [payAmount, setPayAmount] = useState('')
-  const [payReceived, setPayReceived] = useState('')
 
   const fetchSales = useCallback(async () => {
     setLoading(true); setError('')
@@ -59,7 +58,6 @@ export default function Sales() {
     setPayments([])
     setPayMethod('cash')
     setPayAmount('')
-    setPayReceived('')
     setPdvOpen(true)
   }
 
@@ -73,21 +71,19 @@ export default function Sales() {
     }).filter(item => item.quantity > 0))
   }
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart])
   
-  const paymentsTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+  const paymentsTotal = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments])
   const remaining = Math.max(0, cartTotal - paymentsTotal)
   const isFullyPaid = cart.length > 0 && paymentsTotal >= cartTotal - 0.01
 
   const handleAddPayment = () => {
     const amt = Number(payAmount)
-    if (!amt || amt <= 0) return alert('Enter a valid amount')
-    if (amt > remaining + 0.01 && payMethod !== 'cash') return alert('Amount cannot exceed remaining total unless using cash')
-    
-    // For cash, we allow amt > remaining to calculate change. 
-    // Effectively, the applied amount is only up to the remaining.
+    if (!amt || amt <= 0) return alert('Por favor, informe um valor numérico válido.')
+    if (amt > remaining + 0.01 && payMethod !== 'cash') return alert('O valor não pode exceder o restante, exceto em dinheiro.')
+
     const appliedAmount = Math.min(amt, remaining)
-    const received = payMethod === 'cash' ? Number(payReceived || amt) : amt
+    const received = amt
     
     setPayments([...payments, { 
       id: Date.now(), 
@@ -97,7 +93,6 @@ export default function Sales() {
       change: Math.max(0, received - appliedAmount)
     }])
     setPayAmount('')
-    setPayReceived('')
   }
   
   const handleRemovePayment = (id) => {
@@ -171,15 +166,21 @@ export default function Sales() {
     })
   }
 
-  const filteredPdvProducts = products.filter(p => 
-    p.name.toLowerCase().includes(pdvSearch.toLowerCase()) ||
-    (p.barcode && p.barcode.includes(pdvSearch))
-  )
+  const filteredPdvProducts = useMemo(() => {
+    if (!pdvSearch) return products
+    const s = pdvSearch.toLowerCase()
+    return products.filter(p => 
+      p.name.toLowerCase().includes(s) || (p.barcode && p.barcode.includes(s))
+    )
+  }, [products, pdvSearch])
 
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-    (c.phone && c.phone.includes(customerSearch))
-  ).slice(0, 5)
+  const filteredCustomers = useMemo(() => {
+    if (!customerSearch) return customers.slice(0, 5)
+    const s = customerSearch.toLowerCase()
+    return customers.filter(c => 
+      c.name.toLowerCase().includes(s) || (c.phone && c.phone.includes(s))
+    ).slice(0, 5)
+  }, [customers, customerSearch])
 
   return (
     <Layout title="Sales" subtitle="Manage your revenue and orders">
@@ -410,8 +411,8 @@ export default function Sales() {
                   {cart.length > 0 && (
                     <div className="mb-4 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4">
                       <div className="flex justify-between items-center mb-3">
-                        <label className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Payment Details</label>
-                        <span className="text-[11px] font-mono text-warning">Remaining: ${remaining.toFixed(2)}</span>
+                        <label className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Pagamentos</label>
+                        <span className="text-[11px] font-mono text-warning">Restante: ${remaining.toFixed(2)}</span>
                       </div>
                       
                       {/* Added Payments List */}
@@ -447,29 +448,18 @@ export default function Sales() {
                             </select>
                             <input 
                               type="number" 
-                              placeholder={`Amt (Max ${remaining.toFixed(2)})`}
+                              placeholder={payMethod === 'cash' ? `Recebido (Troco Auto)` : `A Pagar (Max ${remaining.toFixed(2)})`}
                               className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
                               value={payAmount} onChange={e => setPayAmount(e.target.value)}
                               min="0.01" step="0.01"
                             />
                           </div>
-                          {payMethod === 'cash' && (
-                            <div className="mt-2">
-                              <input 
-                                type="number" 
-                                placeholder="Valor Recebido (Received Amount - Required for Change)"
-                                className="input-field h-9 w-full text-[12px] bg-white/[0.05] border-white/10 border-success/30"
-                                value={payReceived} onChange={e => setPayReceived(e.target.value)}
-                                min="0.01" step="0.01"
-                              />
-                            </div>
-                          )}
                           <button 
                             type="button" 
                             className="bg-white/10 hover:bg-white/20 text-white w-full h-8 rounded-lg text-[12px] font-medium transition-colors"
                             onClick={handleAddPayment}
                           >
-                            Add Payment Method
+                            Adicionar Pagamento
                           </button>
                         </div>
                       )}

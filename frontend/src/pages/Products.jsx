@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import ProductsTable from '../components/ProductsTable'
@@ -32,9 +32,11 @@ export default function Products() {
     setTimeout(() => setSpinning(false), 400)
   }
 
-  const filtered = search.trim()
-    ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
-    : products
+  const filtered = useMemo(() => {
+    if (!search.trim()) return products
+    const s = search.toLowerCase()
+    return products.filter(p => p.name.toLowerCase().includes(s))
+  }, [products, search])
 
   return (
     <Layout title="Products" subtitle="Manage your inventory">
