@@ -140,7 +140,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
             id="category_id" name="category_id"
             value={form.category_id || ''} onChange={handleChange}
             disabled={fetchingCategories}
-            className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+            className="input-field appearance-none cursor-pointer pr-8 transition-colors" style={{ cursor: 'pointer' }}
           >
             <option value="" className="bg-surface-1">No category</option>
             {categories.map(cat => (
@@ -172,7 +172,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
             <select
               id="unit_type" name="unit_type"
               value={form.unit_type} onChange={handleChange}
-              className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+              className="input-field appearance-none cursor-pointer pr-8 transition-colors" style={{ cursor: 'pointer' }}
             >
               <option value="un" className="bg-surface-1">Unit (un)</option>
               <option value="kg" className="bg-surface-1">Kilogram (kg)</option>
@@ -263,20 +263,20 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       <div
         className="rounded-[9px] px-4 py-3 transition-all duration-300"
         style={{
-          background: showPreview ? 'rgba(109,106,254,0.06)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${showPreview ? 'rgba(109,106,254,0.18)' : 'rgba(255,255,255,0.06)'}`,
+          background: showPreview ? 'rgba(109,106,254,0.06)' : 'var(--color-badge-bg)',
+          border: `1px solid ${showPreview ? 'rgba(109,106,254,0.18)' : 'var(--color-border)'}`,
           opacity: showPreview ? 1 : 0.5,
         }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={showPreview ? 'rgba(109,106,254,0.8)' : 'rgba(255,255,255,0.2)'} strokeWidth={2}>
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={showPreview ? 'rgba(109,106,254,0.8)' : 'var(--color-text-muted)'} strokeWidth={2}>
               <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
             <span className="text-[11px] text-text-tertiary">Total inventory value</span>
           </div>
           <span className="text-[13px] font-semibold font-mono tracking-[-0.01em]"
-            style={{ color: showPreview ? '#ededf2' : 'rgba(255,255,255,0.2)' }}>
+            style={{ color: showPreview ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>
             ${totalValue}
           </span>
         </div>

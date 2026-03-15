@@ -246,7 +246,7 @@ export default function Sales() {
         <div className="card p-8 text-center text-danger text-[13px]">{error}</div>
       ) : sales.length === 0 ? (
         <div className="card py-20 text-center">
-          <div className="w-12 h-12 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-4 text-text-muted">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-text-muted" style={{ background: 'var(--color-badge-bg)' }}>
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -257,7 +257,7 @@ export default function Sales() {
         <div className="card overflow-hidden">
           <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="bg-white/[0.02] border-b border-white/[0.06]">
+              <tr style={{ background: 'var(--color-badge-bg)', borderBottom: '1px solid var(--color-border)' }}>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Sale ID</th>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Customer</th>
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider">Items</th>
@@ -266,9 +266,9 @@ export default function Sales() {
                 <th className="px-5 py-3 font-medium text-text-muted uppercase text-[10px] tracking-wider text-right">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody style={{ borderColor: 'var(--color-border-subtle)' }} className="divide-y">
               {sales.map((sale) => (
-                <tr key={sale.id} className="hover:bg-white/[0.01] transition-colors">
+                <tr key={sale.id} className="transition-colors" onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'} onMouseLeave={e => e.currentTarget.style.background = ''}>
                   <td className="px-5 py-4 font-mono text-[11px] text-text-muted">#{String(sale.id).padStart(6, '0')}</td>
                   <td className="px-5 py-4 font-medium text-text-primary">{sale.customer?.name || 'Walk-in Customer'}</td>
                   <td className="px-5 py-4 text-text-secondary text-[12px] max-w-[150px] truncate" title={sale.items?.length + " items"}>
@@ -307,9 +307,9 @@ export default function Sales() {
                     <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                 </div>
-                <h2 className="text-[17px] font-bold text-white tracking-tight">Point of Sale</h2>
+                <h2 className="text-[17px] font-bold text-text-primary tracking-tight">Point of Sale</h2>
               </div>
-              <button className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-text-muted transition-colors" onClick={() => setPdvOpen(false)}>
+              <button className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted transition-colors" style={{ background: 'transparent' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'} onClick={() => setPdvOpen(false)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -318,7 +318,7 @@ export default function Sales() {
 
             <div className="flex-1 flex overflow-hidden">
               {/* Left: Products Catalog */}
-              <div className="flex-1 flex flex-col p-6 border-r border-white/10 overflow-hidden">
+              <div className="flex-1 flex flex-col p-6 overflow-hidden" style={{ borderRight: '1px solid var(--color-border)' }}>
                 <div className="relative mb-6">
                   <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -326,7 +326,7 @@ export default function Sales() {
                   <input 
                     type="text" 
                     placeholder="Search explicitly or Scan Barcode (Press Enter)..." 
-                    className="input-field pl-10 h-11 bg-white/[0.03] border-white/10 text-[14px]"
+                    className="input-field pl-10 h-11 text-[14px]"
                     value={pdvSearch}
                     onChange={e => setPdvSearch(e.target.value)}
                     onKeyDown={handleBarcodeScan}
@@ -358,10 +358,10 @@ export default function Sales() {
               </div>
 
               {/* Right: Cart & Checkout */}
-              <div className="w-[360px] bg-white/[0.01] flex flex-col overflow-hidden">
+              <div className="w-[360px] flex flex-col overflow-hidden" style={{ background: 'var(--color-badge-bg)' }}>
                 <div className="p-6 flex-1 flex flex-col overflow-hidden">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[12px] font-bold text-white uppercase tracking-wider opacity-60">Order Summary</h3>
+                    <h3 className="text-[12px] font-bold text-text-secondary uppercase tracking-wider">Order Summary</h3>
                     {cart.length > 0 && (
                       <button onClick={() => setCart([])} className="text-[10px] text-danger hover:underline">Clear all</button>
                     )}
@@ -371,9 +371,9 @@ export default function Sales() {
                   <div className="mb-6 relative">
                     <label className="text-[10px] font-bold text-text-tertiary uppercase mb-1.5 block tracking-[0.05em]">Select Customer</label>
                     {selectedCustomer ? (
-                      <div className="flex items-center justify-between bg-white/[0.05] border border-white/10 rounded-lg p-3">
+                      <div className="flex items-center justify-between rounded-lg p-3" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
                         <div>
-                          <p className="text-[13px] font-medium text-white">{selectedCustomer.name}</p>
+                          <p className="text-[13px] font-medium text-text-primary">{selectedCustomer.name}</p>
                           {selectedCustomer.phone && <p className="text-[11px] text-text-muted">{selectedCustomer.phone}</p>}
                         </div>
                         <button onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }} className="text-[11px] text-danger hover:underline">Remove</button>
@@ -383,7 +383,7 @@ export default function Sales() {
                         <input 
                           type="text" 
                           placeholder="Search customer by name or phone..."
-                          className="input-field h-10 w-full bg-white/[0.05] border-white/10 text-[13px]"
+                          className="input-field h-10 w-full text-[13px]"
                           value={customerSearch}
                           onChange={e => setCustomerSearch(e.target.value)}
                           onFocus={() => setCustomerSearchFocus(true)}
@@ -394,10 +394,10 @@ export default function Sales() {
                             {filteredCustomers.length > 0 ? filteredCustomers.map(c => (
                               <button 
                                 key={c.id} 
-                                className="w-full text-left px-4 py-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.02] last:border-0"
+                                className="w-full text-left px-4 py-2 transition-colors last:border-0" style={{ borderBottom: '1px solid var(--color-border-subtle)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'} onMouseLeave={e => e.currentTarget.style.background = ''}
                                 onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }}
                               >
-                                <span className="block text-[13px] text-white">{c.name}</span>
+                                <span className="block text-[13px] text-text-primary">{c.name}</span>
                                 {c.phone && <span className="block text-[10px] text-text-muted">{c.phone}</span>}
                               </button>
                             )) : (
@@ -420,17 +420,17 @@ export default function Sales() {
                       </div>
                     ) : (
                       cart.map(item => (
-                        <div key={item.product_id} className="flex items-center gap-3 bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
+                        <div key={item.product_id} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)' }}>
                           <div className="flex-1 min-w-0">
                             <h5 className="text-[12px] font-semibold text-text-primary truncate">{item.name}</h5>
                             <span className="text-[11px] font-mono text-accent">${item.price.toFixed(2)}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-black/20 rounded-lg p-1 border border-white/5">
-                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-6 h-6 rounded flex items-center justify-center text-white bg-white/5 hover:bg-white/10 transition-colors">-</button>
+                          <div className="flex items-center gap-1.5 rounded-lg p-1" style={{ background: 'var(--color-surface-3)', border: '1px solid var(--color-border-subtle)' }}>
+                            <button onClick={() => updateCartQuantity(item.product_id, -1)} className="w-6 h-6 rounded flex items-center justify-center text-text-primary transition-colors" style={{ background: 'var(--color-badge-bg)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--color-badge-bg)'}>-</button>
                             <div className="relative">
                               <input 
                                 type="number" 
-                                className="w-14 text-center bg-transparent text-[11px] font-bold text-white outline-none" 
+                                className="w-14 text-center bg-transparent text-[11px] font-bold text-text-primary outline-none" 
                                 value={item.quantity}
                                 onChange={(e) => setCartQtyDirect(item.product_id, e.target.value)}
                                 step={item.allow_fraction ? "0.01" : "1"}
@@ -441,7 +441,7 @@ export default function Sales() {
                             <button 
                               onClick={() => updateCartQuantity(item.product_id, 1)} 
                               disabled={item.quantity >= item.max_stock}
-                              className="w-6 h-6 rounded flex items-center justify-center text-white bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-6 h-6 rounded flex items-center justify-center text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed" style={{ background: 'var(--color-badge-bg)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-nav-hover-bg)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--color-badge-bg)'}
                             >+</button>
                           </div>
                           
@@ -460,16 +460,16 @@ export default function Sales() {
                   </div>
 
                   {/* Totals */}
-                  <div className="pt-4 border-t border-white/10 mb-4">
+                  <div className="pt-4 mb-4" style={{ borderTop: '1px solid var(--color-border)' }}>
                     <div className="flex justify-between items-center">
-                      <span className="text-[14px] font-bold text-white uppercase tracking-wider">Total</span>
+                      <span className="text-[14px] font-bold text-text-primary uppercase tracking-wider">Total</span>
                       <span className="text-[20px] font-black text-accent tracking-tight">${cartTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {/* Payments Section */}
                   {cart.length > 0 && (
-                    <div className="mb-4 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4">
+                    <div className="mb-4 rounded-xl p-4" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)' }}>
                       <div className="flex justify-between items-center mb-3">
                         <label className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Pagamentos</label>
                         <span className="text-[11px] font-mono text-warning">Restante: ${remaining.toFixed(2)}</span>
@@ -479,14 +479,14 @@ export default function Sales() {
                       {payments.length > 0 && (
                         <div className="space-y-2 mb-3">
                           {payments.map(p => (
-                            <div key={p.id} className="flex justify-between items-center text-[12px] bg-black/30 px-3 py-2 rounded-lg border border-white/[0.02]">
+                            <div key={p.id} className="flex justify-between items-center text-[12px] px-3 py-2 rounded-lg" style={{ background: 'var(--color-surface-3)', border: '1px solid var(--color-border-subtle)' }}>
                               <div className="flex items-center gap-2 text-text-secondary capitalize">
                                 <span>{p.method}</span>
                                 {p.change > 0 && <span className="text-[10px] text-success font-mono bg-success/10 px-1.5 rounded">Change: ${p.change.toFixed(2)}</span>}
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className="font-mono text-white">${p.amount.toFixed(2)}</span>
-                                <button onClick={() => handleRemovePayment(p.id)} className="text-danger hover:text-white transition-colors">✕</button>
+                                <span className="font-mono text-text-primary">${p.amount.toFixed(2)}</span>
+                                <button onClick={() => handleRemovePayment(p.id)} className="text-danger hover:text-text-primary transition-colors">✕</button>
                               </div>
                             </div>
                           ))}
@@ -498,7 +498,7 @@ export default function Sales() {
                         <div className="space-y-2.5">
                           <div className="grid grid-cols-2 gap-2">
                             <select 
-                              className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
+                              className="input-field h-9 text-[12px]"
                               value={payMethod} onChange={e => setPayMethod(e.target.value)}
                             >
                               <option value="cash" className="bg-surface-1">Dinheiro (Cash)</option>
@@ -509,14 +509,14 @@ export default function Sales() {
                             <input 
                               type="number" 
                               placeholder={payMethod === 'cash' ? `Recebido (Troco Auto)` : `A Pagar (Max ${remaining.toFixed(2)})`}
-                              className="input-field h-9 text-[12px] bg-white/[0.05] border-white/10"
+                              className="input-field h-9 text-[12px]"
                               value={payAmount} onChange={e => setPayAmount(e.target.value)}
                               min="0.01" step="0.01"
                             />
                           </div>
                           <button 
                             type="button" 
-                            className="bg-white/10 hover:bg-white/20 text-white w-full h-8 rounded-lg text-[12px] font-medium transition-colors"
+                            className="w-full h-8 rounded-lg text-[12px] font-medium transition-colors text-text-primary" style={{ background: 'var(--color-surface-3)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-4)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--color-surface-3)'}
                             onClick={handleAddPayment}
                           >
                             Adicionar Pagamento
