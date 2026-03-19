@@ -1,13 +1,16 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from app.database import Base
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
+from app.database import Base
+
 
 class Sale(Base):
     __tablename__ = "sales"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     total = Column(Float, nullable=False)
     amount_received = Column(Float, nullable=True)
@@ -18,6 +21,7 @@ class Sale(Base):
     customer = relationship("Customer")
     items = relationship("SaleItem", back_populates="sale")
     payments = relationship("Payment", back_populates="sale")
+
 
 class SaleItem(Base):
     __tablename__ = "sale_items"
