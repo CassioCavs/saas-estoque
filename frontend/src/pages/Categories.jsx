@@ -1,31 +1,17 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { categoriesService, getErrorMessage } from '../services/api'
+import { useFetch } from '../hooks/useFetch'
 
 export default function Categories() {
-  const [categories, setCategories] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
   const [form, setForm] = useState({ name: '' })
   const [saveLoading, setSaveLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
-  const fetchCategories = useCallback(async () => {
-    setLoading(true); setError('')
-    try {
-      const { data } = await categoriesService.getAll()
-      setCategories(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load categories.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchCategories() }, [fetchCategories])
+  const { data: categories, loading, error, refetch: fetchCategories } = useFetch(categoriesService.getAll)
 
   const handleOpenModal = (category = null) => {
     setEditingCategory(category)
@@ -46,7 +32,7 @@ export default function Categories() {
       setModalOpen(false)
       fetchCategories()
     } catch (err) {
-      alert(getErrorMessage(err, 'Failed to save category.'))
+      alert(getErrorMessage(err, 'Falha ao salvar categoria.'))
     } finally {
       setSaveLoading(false)
     }
@@ -59,23 +45,23 @@ export default function Categories() {
       setDeleteTarget(null)
       fetchCategories()
     } catch (err) {
-      alert(getErrorMessage(err, 'Failed to delete category.'))
+      alert(getErrorMessage(err, 'Falha ao excluir categoria.'))
     }
   }
 
   return (
-    <Layout title="Categories" subtitle="Manage your product organization">
+    <Layout title="Categorias" subtitle="Organize seus produtos">
       
       {/* ── Toolbar ── */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-[14px] font-semibold text-text-primary">
-          All Categories <span className="ml-2 text-text-muted font-normal">({categories.length})</span>
+          Todas as Categorias <span className="ml-2 text-text-muted font-normal">({categories.length})</span>
         </h2>
         <button className="btn-primary" onClick={() => handleOpenModal()}>
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          New Category
+          Nova Categoria
         </button>
       </div>
 
@@ -88,9 +74,9 @@ export default function Categories() {
         <div className="card p-8 text-center text-danger text-[13px]">{error}</div>
       ) : categories.length === 0 ? (
         <div className="card py-16 text-center">
-          <p className="text-text-muted text-[13px]">No categories found.</p>
+          <p className="text-text-muted text-[13px]">Nenhuma categoria encontrada.</p>
           <button className="mt-4 text-accent text-[12px] font-medium" onClick={() => handleOpenModal()}>
-            Create your first category
+            Crie sua primeira categoria
           </button>
         </div>
       ) : (
@@ -98,7 +84,7 @@ export default function Categories() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/[0.06]">
-                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Name</th>
+                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Nome</th>
                 <th className="px-5 py-3 text-right"></th>
               </tr>
             </thead>
@@ -117,7 +103,7 @@ export default function Categories() {
                       <Link 
                         to={`/categories/${category.id}/products`}
                         className="p-1.5 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-text-primary transition-all"
-                        title="View Products"
+                        title="Ver Produtos"
                       >
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -127,7 +113,7 @@ export default function Categories() {
                       <button 
                         onClick={() => handleOpenModal(category)}
                         className="p-1.5 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-text-primary transition-all"
-                        title="Edit"
+                        title="Editar"
                       >
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -137,7 +123,7 @@ export default function Categories() {
                       <button 
                         onClick={() => setDeleteTarget(category)}
                         className="p-1.5 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-danger transition-all"
-                        title="Delete"
+                        title="Excluir"
                       >
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                           <polyline points="3 6 5 6 21 6" />
@@ -159,25 +145,25 @@ export default function Categories() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
           <div className="relative card w-full max-w-sm p-6 animate-fade-up">
             <h3 className="text-[16px] font-semibold text-text-primary mb-4">
-              {editingCategory ? 'Edit Category' : 'New Category'}
+              {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-text-tertiary">Category Name</label>
+                <label className="text-[11px] font-medium text-text-tertiary">Nome da Categoria</label>
                 <input 
                   type="text" 
                   value={form.name} 
                   onChange={e => setForm({ name: e.target.value })}
-                  placeholder="e.g. Electronics"
+                  placeholder="Ex.: Eletrônicos"
                   className="input-field"
                   autoFocus
                 />
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="submit" disabled={saveLoading || !form.name.trim()} className="btn-primary flex-1">
-                  {saveLoading ? 'Saving...' : 'Save Category'}
+                  {saveLoading ? 'Salvando...' : 'Salvar Categoria'}
                 </button>
-                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button>
               </div>
             </form>
           </div>
@@ -194,11 +180,11 @@ export default function Categories() {
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
               </svg>
             </div>
-            <h3 className="text-[15px] font-semibold text-text-primary mb-2">Delete Category?</h3>
-            <p className="text-[12px] text-text-muted mb-6">This will permanently remove "{deleteTarget.name}". This action cannot be undone.</p>
+            <h3 className="text-[15px] font-semibold text-text-primary mb-2">Excluir Categoria?</h3>
+            <p className="text-[12px] text-text-muted mb-6">Isso removerá permanentemente "{deleteTarget.name}". Esta ação não pode ser desfeita.</p>
             <div className="flex gap-2">
-              <button className="btn-primary bg-danger hover:bg-danger/90 flex-1 border-none" onClick={handleDelete}>Delete</button>
-              <button className="btn-secondary flex-1" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button className="btn-primary bg-danger hover:bg-danger/90 flex-1 border-none" onClick={handleDelete}>Excluir</button>
+              <button className="btn-secondary flex-1" onClick={() => setDeleteTarget(null)}>Cancelar</button>
             </div>
           </div>
         </div>

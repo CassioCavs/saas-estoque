@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { reportsService, getErrorMessage } from '../services/api'
+import { formatBRL } from '../utils/format'
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, PieChart, Pie
@@ -26,7 +27,7 @@ export default function Reports() {
         setStockReport(stockRes.data)
         setTopProducts(topRes.data)
       } catch (err) {
-        setError(getErrorMessage(err, 'Failed to load report data.'))
+        setError(getErrorMessage(err, 'Falha ao carregar dados dos relatórios.'))
       } finally {
         setLoading(false)
       }
@@ -35,7 +36,7 @@ export default function Reports() {
   }, [])
 
   if (loading) return (
-    <Layout title="Analytics" subtitle="Real-time business insights">
+    <Layout title="Relatórios" subtitle="Insights de negócio em tempo real">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         {[1, 2, 3].map(i => <div key={i} className="h-32 card animate-pulse opacity-50" />)}
       </div>
@@ -45,31 +46,31 @@ export default function Reports() {
     </Layout>
   )
 
-  const COLORS = ['#6d6afe', '#9b8fff', '#3b82f6', '#10b981', '#f59e0b']
+  const COLORS = ['#5f7f6e', '#6b8f7a', '#88a696', '#2c4337', '#e2e8e4']
 
   return (
-    <Layout title="Analytics" subtitle="Real-time business insights">
+    <Layout title="Relatórios" subtitle="Insights de negócio em tempo real">
       
       {/* ── Summary Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <SummaryCard 
-          title="Total Revenue" 
-          value={`$${salesReport?.total_revenue?.toLocaleString() || '0'}`} 
-          subtitle={`${salesReport?.total_sales || 0} total sales`}
+          title="Receita Total" 
+          value={formatBRL(salesReport?.total_revenue || 0)} 
+          subtitle={`${salesReport?.total_sales || 0} vendas no total`}
           icon={<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
           color="accent"
         />
         <SummaryCard 
-          title="Inventory Value" 
-          value={`$${stockReport?.total_stock_value?.toLocaleString() || '0'}`} 
-          subtitle={`${stockReport?.total_stock || 0} units in stock`}
+          title="Valor do Estoque" 
+          value={formatBRL(stockReport?.total_stock_value || 0)} 
+          subtitle={`${stockReport?.total_stock || 0} unidades em estoque`}
           icon={<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>}
           color="success"
         />
         <SummaryCard 
-          title="Units Sold" 
-          value={salesReport?.total_products_sold?.toLocaleString() || '0'} 
-          subtitle="All-time volume"
+          title="Unidades Vendidas" 
+          value={salesReport?.total_products_sold?.toLocaleString('pt-BR') || '0'} 
+          subtitle="Volume total"
           icon={<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>}
           color="warning"
         />
@@ -81,7 +82,7 @@ export default function Reports() {
         <div className="card p-6 min-h-[400px] flex flex-col">
           <h3 className="text-[15px] font-bold text-text-primary mb-6 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-            Best Selling Products
+            Produtos Mais Vendidos
           </h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -114,7 +115,7 @@ export default function Reports() {
         <div className="card p-6 min-h-[400px] flex flex-col">
           <h3 className="text-[15px] font-bold text-text-primary mb-6 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-success" />
-            Revenue Contribution
+            Contribuição de Receita
           </h3>
           <div className="h-[300px] w-full flex items-center">
             <div className="w-1/2 h-full">
@@ -145,7 +146,7 @@ export default function Reports() {
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                     <span className="text-[12px] text-text-muted truncate">{p.product_name}</span>
                   </div>
-                  <span className="text-[12px] font-mono text-text-primary ml-2">${p.total_revenue.toFixed(0)}</span>
+                  <span className="text-[12px] font-mono text-text-primary ml-2">{formatBRL(p.total_revenue, { decimals: 0 })}</span>
                 </div>
               ))}
             </div>
@@ -169,7 +170,7 @@ function SummaryCard({ title, value, subtitle, icon, color }) {
     <div className="card p-6 flex items-start justify-between group hover:border-white/20 transition-all">
       <div>
         <p className="text-[11px] font-bold text-text-tertiary uppercase tracking-wider mb-2">{title}</p>
-        <h4 className="text-[26px] font-black text-white tracking-tight leading-none mb-2">{value}</h4>
+        <h4 className="text-[26px] font-black text-text-primary tracking-tight leading-none mb-2">{value}</h4>
         <p className="text-[12px] text-text-muted font-medium">{subtitle}</p>
       </div>
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${colorMap[color]}`}>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { categoriesService } from '../services/api'
+import { formatBRL } from '../utils/format'
 
 export default function ProductForm({ initialValues, onSubmit, mode = 'create', loading = false, error = '' }) {
   const navigate = useNavigate()
@@ -73,9 +74,9 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
   const validate = () => {
     const errs = {}
-    if (!form.name.trim()) errs.name = 'Required'
-    if (form.sale_price === '') errs.sale_price = 'Required'
-    if (form.stock === '') errs.stock = 'Required'
+    if (!form.name.trim()) errs.name = 'Obrigatório'
+    if (form.sale_price === '') errs.sale_price = 'Obrigatório'
+    if (form.stock === '') errs.stock = 'Obrigatório'
     return errs
   }
 
@@ -122,27 +123,27 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       )}
 
       {/* Name */}
-      <Field label="Product name" required error={touched.name && fieldErrors.name}>
+      <Field label="Nome do produto" required error={touched.name && fieldErrors.name}>
         <input
           ref={nameRef}
           id="name" name="name" type="text"
           value={form.name} onChange={handleChange} onBlur={handleBlur}
-          placeholder="e.g. Wireless Keyboard"
+          placeholder="Ex.: Teclado sem fio"
           className={`input-field ${touched.name && fieldErrors.name ? 'error' : ''}`}
           autoFocus
         />
       </Field>
 
       {/* Category */}
-      <Field label="Category">
+      <Field label="Categoria">
         <div className="relative group">
           <select
             id="category_id" name="category_id"
             value={form.category_id || ''} onChange={handleChange}
             disabled={fetchingCategories}
-            className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+            className="input-field appearance-none cursor-pointer pr-8 transition-colors" style={{ cursor: 'pointer' }}
           >
-            <option value="" className="bg-surface-1">No category</option>
+            <option value="" className="bg-surface-1">Sem categoria</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id} className="bg-surface-1">{cat.name}</option>
             ))}
@@ -157,28 +158,28 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
       <div className="grid grid-cols-2 gap-3">
         {/* Barcode */}
-        <Field label="Barcode (Optional)">
+        <Field label="Código de Barras (Opcional)">
           <input
             id="barcode" name="barcode" type="text"
             value={form.barcode} onChange={handleChange} onBlur={handleBlur}
-            placeholder="Scan or type..."
+            placeholder="Escanear ou digitar..."
             className="input-field"
           />
         </Field>
 
         {/* Unit Type */}
-        <Field label="Measurement Unit">
+        <Field label="Unidade de Medida">
           <div className="relative group">
             <select
               id="unit_type" name="unit_type"
               value={form.unit_type} onChange={handleChange}
-              className="input-field appearance-none cursor-pointer pr-8 hover:bg-white/[0.045] transition-colors"
+              className="input-field appearance-none cursor-pointer pr-8 transition-colors" style={{ cursor: 'pointer' }}
             >
-              <option value="un" className="bg-surface-1">Unit (un)</option>
-              <option value="kg" className="bg-surface-1">Kilogram (kg)</option>
-              <option value="g" className="bg-surface-1">Gram (g)</option>
-              <option value="l" className="bg-surface-1">Liter (l)</option>
-              <option value="m" className="bg-surface-1">Meter (m)</option>
+              <option value="un" className="bg-surface-1">Unidade (un)</option>
+              <option value="kg" className="bg-surface-1">Quilograma (kg)</option>
+              <option value="g" className="bg-surface-1">Grama (g)</option>
+              <option value="l" className="bg-surface-1">Litro (l)</option>
+              <option value="m" className="bg-surface-1">Metro (m)</option>
             </select>
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-text-secondary transition-colors">
               <svg width="10" height="6" fill="none" viewBox="0 0 10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -191,19 +192,19 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
       {/* Prices Logic */}
       <div className="grid grid-cols-3 gap-3">
-        <Field label="Cost (USD)" error={touched.cost_price && fieldErrors.cost_price}>
+        <Field label="Custo (R$)" error={touched.cost_price && fieldErrors.cost_price}>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">R$</span>
             <input
               id="cost_price" name="cost_price" type="number" min="0" step="0.01"
               value={form.cost_price} onChange={handleChange} onBlur={handleBlur}
-              placeholder="0.00"
-              className={`input-field pl-6 ${touched.cost_price && fieldErrors.cost_price ? 'error' : ''}`}
+              placeholder="0,00"
+              className={`input-field pl-8 ${touched.cost_price && fieldErrors.cost_price ? 'error' : ''}`}
             />
           </div>
         </Field>
 
-        <Field label="Margin (%)" error={touched.profit_margin && fieldErrors.profit_margin}>
+        <Field label="Margem (%)" error={touched.profit_margin && fieldErrors.profit_margin}>
           <div className="relative">
             <input
               id="profit_margin" name="profit_margin" type="number" step="0.1"
@@ -215,14 +216,14 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
           </div>
         </Field>
 
-        <Field label="Sale Price" required error={touched.sale_price && fieldErrors.sale_price}>
+        <Field label="Preço de Venda" required error={touched.sale_price && fieldErrors.sale_price}>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[12px] select-none pointer-events-none font-mono">R$</span>
             <input
               id="sale_price" name="sale_price" type="number" min="0" step="0.01"
               value={form.sale_price} onChange={handleChange} onBlur={handleBlur}
-              placeholder="0.00"
-              className={`input-field pl-6 border-accent/30 ${touched.sale_price && fieldErrors.sale_price ? 'error' : ''}`}
+              placeholder="0,00"
+              className={`input-field pl-8 border-accent/30 ${touched.sale_price && fieldErrors.sale_price ? 'error' : ''}`}
             />
           </div>
         </Field>
@@ -230,7 +231,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
 
       {/* Stock */}
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Current Stock" required error={touched.stock && fieldErrors.stock}>
+        <Field label="Estoque Atual" required error={touched.stock && fieldErrors.stock}>
           <div className="relative">
             <input
               id="stock" name="stock" type="number" min="0" step={isFractional ? "0.01" : "1"}
@@ -244,7 +245,7 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
           </div>
         </Field>
         
-        <Field label="Min. Stock">
+        <Field label="Estoque Mín.">
           <div className="relative">
             <input
               id="min_stock" name="min_stock" type="number" min="0" step={isFractional ? "0.01" : "1"}
@@ -263,21 +264,21 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       <div
         className="rounded-[9px] px-4 py-3 transition-all duration-300"
         style={{
-          background: showPreview ? 'rgba(109,106,254,0.06)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${showPreview ? 'rgba(109,106,254,0.18)' : 'rgba(255,255,255,0.06)'}`,
+          background: showPreview ? 'rgba(95,127,110,0.06)' : 'var(--color-badge-bg)',
+          border: `1px solid ${showPreview ? 'rgba(95,127,110,0.18)' : 'var(--color-border)'}`,
           opacity: showPreview ? 1 : 0.5,
         }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={showPreview ? 'rgba(109,106,254,0.8)' : 'rgba(255,255,255,0.2)'} strokeWidth={2}>
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={showPreview ? 'rgba(95,127,110,0.8)' : 'var(--color-text-muted)'} strokeWidth={2}>
               <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
-            <span className="text-[11px] text-text-tertiary">Total inventory value</span>
+            <span className="text-[11px] text-text-tertiary">Valor total do inventário</span>
           </div>
           <span className="text-[13px] font-semibold font-mono tracking-[-0.01em]"
-            style={{ color: showPreview ? '#ededf2' : 'rgba(255,255,255,0.2)' }}>
-            ${totalValue}
+            style={{ color: showPreview ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>
+            {formatBRL(totalValue)}
           </span>
         </div>
       </div>
@@ -286,12 +287,12 @@ export default function ProductForm({ initialValues, onSubmit, mode = 'create', 
       <div className="flex items-center gap-2 pt-1">
         <button type="submit" disabled={loading} className="btn-primary">
           {loading
-            ? <><span className="w-3.5 h-3.5 spinner" /> Saving…</>
-            : mode === 'create' ? 'Create product' : 'Save changes'
+            ? <><span className="w-3.5 h-3.5 spinner" /> Salvando…</>
+            : mode === 'create' ? 'Criar produto' : 'Salvar alterações'
           }
         </button>
         <button type="button" className="btn-secondary" onClick={() => navigate(-1)} disabled={loading}>
-          Cancel
+          Cancelar
         </button>
       </div>
     </form>

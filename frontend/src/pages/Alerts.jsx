@@ -15,7 +15,7 @@ export default function Alerts() {
       const { data } = await alertsService.getLowStock()
       setAlerts(data)
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load stock alerts.'))
+      setError(getErrorMessage(err, 'Falha ao carregar alertas de estoque.'))
     } finally {
       setLoading(false)
     }
@@ -24,7 +24,7 @@ export default function Alerts() {
   useEffect(() => { fetchAlerts() }, [fetchAlerts])
 
   return (
-    <Layout title="Stock Alerts" subtitle="Monitor critical inventory levels">
+    <Layout title="Alertas de Estoque" subtitle="Monitore níveis críticos do inventário">
       
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
@@ -39,8 +39,8 @@ export default function Alerts() {
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22,4 12,14.01 9,11.01" />
             </svg>
           </div>
-          <h3 className="text-[16px] font-bold text-text-primary mb-2 tracking-tight">Everything is fine!</h3>
-          <p className="text-text-muted text-[13px]">No products are currently at or below minimum stock.</p>
+          <h3 className="text-[16px] font-bold text-text-primary mb-2 tracking-tight">Tudo em ordem!</h3>
+          <p className="text-text-muted text-[13px]">Nenhum produto está no ou abaixo do estoque mínimo no momento.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -63,12 +63,12 @@ export default function Alerts() {
 
                 <div className="flex items-center gap-6">
                   <div>
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase mb-1">Current Stock</p>
+                    <p className="text-[10px] font-bold text-text-tertiary uppercase mb-1">Estoque Atual</p>
                     <p className="text-[20px] font-black text-danger tracking-tight">{product.stock}</p>
                   </div>
                   <div className="w-px h-8 bg-white/5" />
                   <div>
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase mb-1">Minimum Stock</p>
+                    <p className="text-[10px] font-bold text-text-tertiary uppercase mb-1">Estoque Mínimo</p>
                     <p className="text-[15px] font-bold text-text-muted">{product.min_stock}</p>
                   </div>
                 </div>
@@ -78,7 +78,7 @@ export default function Alerts() {
                 className="btn-secondary w-full text-[12px] h-9 border-white/10 hover:bg-white/5"
                 onClick={() => navigate(`/edit-product/${product.id}`)}
               >
-                Refill Inventory
+                Repor Estoque
               </button>
             </div>
           ))}

@@ -15,30 +15,30 @@ export default function CreateProduct() {
       await productsService.create(values)
       navigate('/products', { replace: true })
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to create product.'))
+      setError(getErrorMessage(err, 'Falha ao criar produto.'))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Layout title="New Product" subtitle="Add to inventory">
+    <Layout title="Novo Produto" subtitle="Adicionar ao inventário">
       <div className="max-w-xl">
-        <Breadcrumb items={[{ label: 'Products', to: '/products' }, { label: 'New product' }]} navigate={navigate} />
+        <Breadcrumb items={[{ label: 'Produtos', to: '/products' }, { label: 'Novo produto' }]} navigate={navigate} />
 
         <div className="card overflow-hidden">
           {/* Card header */}
           <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--color-border)' }}>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-[9px] flex items-center justify-center text-accent flex-shrink-0"
-                style={{ background: 'rgba(109,106,254,0.1)', border: '1px solid rgba(109,106,254,0.2)' }}>
+                style={{ background: 'rgba(95,127,110,0.1)', border: '1px solid rgba(95,127,110,0.2)' }}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
               </div>
               <div>
-                <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.015em]">Product details</h2>
-                <p className="text-[11px] text-text-muted mt-px">Fill in the fields below to add a new product</p>
+                <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.015em]">Detalhes do produto</h2>
+                <p className="text-[11px] text-text-muted mt-px">Preencha os campos abaixo para adicionar um novo produto</p>
               </div>
             </div>
           </div>

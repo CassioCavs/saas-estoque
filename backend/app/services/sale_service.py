@@ -6,6 +6,7 @@ from app.models.product import Product
 from app.schemas.sale_schema import SaleCreate, SaleResponse
 from .product_service import get_product_by_id
 from .activity_log_service import log_activity
+from .stock_service import record_stock_movement
 
 def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
     # Debug: verificar dados recebidos
@@ -51,11 +52,11 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
     db.commit()
     db.refresh(db_sale)
 
-    # Validar e registrar pagamentos
+    # Strict payment validation
     payments_total = sum(p.amount for p in sale_data.payments)
-    if round(payments_total, 2) != round(total, 2):
-        # Apenas um aviso ou validação leve, pois o frontend controla isso rigidamente
-        pass
+    difference = abs(payments_total - total)
+    if difference > 0.05:  # Margin for floating-point inaccuracies
+        raise HTTPException(status_code=400, detail="Payment total does not match sale total.")
 
     for payment in sale_data.payments:
         db_payment = Payment(
@@ -74,8 +75,19 @@ def create_sale(db: Session, user_id: int, sale_data: SaleCreate) -> Sale:
             price=item_data["price"]
         )
         db.add(db_item)
+        
         # Diminuir estoque no objeto já carregado da memória
         item_data["product_obj"].stock -= item_data["quantity"]
+        
+        # Registrar o histórico de saída
+        record_stock_movement(
+            db=db,
+            product_id=item_data["product_id"],
+            movement_type="saida",
+            quantity=item_data["quantity"],
+            reason=f"Venda PDV",
+            user_id=user_id
+        )
 
     db.commit()
     db.refresh(db_sale)

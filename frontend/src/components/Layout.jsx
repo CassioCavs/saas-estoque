@@ -42,7 +42,7 @@ export default function Layout({ children, title, subtitle }) {
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] text-text-muted"
               style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-success pulse-dot" />
-              Live
+              Ao vivo
             </div>
           </div>
         </header>

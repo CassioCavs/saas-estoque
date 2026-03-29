@@ -1,45 +1,32 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import ProductsTable from '../components/ProductsTable'
-import { productsService, getErrorMessage } from '../services/api'
+import { productsService } from '../services/api'
+import { useFetch, useDebounce } from '../hooks/useFetch'
 
 export default function Products() {
   const navigate = useNavigate()
-  const [products, setProducts]     = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [search, setSearch]   = useState('')
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
   const [spinning, setSpinning] = useState(false)
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true); setError('')
-    try {
-      const { data } = await productsService.getAll()
-      setProducts(Array.isArray(data) ? data : data.products ?? data.data ?? [])
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load products.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchProducts() }, [fetchProducts])
+  const { data: products, loading, error, refetch } = useFetch(productsService.getAll)
 
   const handleRefresh = async () => {
     setSpinning(true)
-    await fetchProducts()
+    await refetch()
     setTimeout(() => setSpinning(false), 400)
   }
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return products
-    const s = search.toLowerCase()
+    if (!debouncedSearch.trim()) return products
+    const s = debouncedSearch.toLowerCase()
     return products.filter(p => p.name.toLowerCase().includes(s))
-  }, [products, search])
+  }, [products, debouncedSearch])
 
   return (
-    <Layout title="Products" subtitle="Manage your inventory">
+    <Layout title="Produtos" subtitle="Gerencie seu inventário">
 
       {/* ── Toolbar ── */}
       <div className="flex items-center gap-2.5 mb-5">
@@ -52,7 +39,7 @@ export default function Products() {
           </svg>
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search products…"
+            placeholder="Buscar produtos…"
             className="input-field pl-8 pr-8"
           />
           {search && (
@@ -78,7 +65,7 @@ export default function Products() {
 
         <div className="ml-auto flex items-center gap-2">
           {/* Refresh */}
-          <button onClick={handleRefresh} disabled={loading} className="btn-secondary" title="Refresh">
+          <button onClick={handleRefresh} disabled={loading} className="btn-secondary" title="Atualizar">
             <svg
               width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
               style={{ transition: 'transform 0.5s', transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)' }}
@@ -86,7 +73,7 @@ export default function Products() {
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
-            Refresh
+            Atualizar
           </button>
 
           {/* Add */}
@@ -94,7 +81,7 @@ export default function Products() {
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Add Product
+            Novo Produto
           </button>
         </div>
       </div>
@@ -107,8 +94,8 @@ export default function Products() {
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           {error}
-          <button onClick={fetchProducts} className="ml-auto text-[11px] underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity">
-            Retry
+          <button onClick={refetch} className="ml-auto text-[11px] underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity">
+            Tentar novamente
           </button>
         </div>
       )}
@@ -119,9 +106,9 @@ export default function Products() {
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--color-text-muted)" strokeWidth={1.5} className="mb-3">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <p className="text-[13px] font-medium text-text-secondary">No results for "{search}"</p>
-          <p className="text-[11px] text-text-muted mt-1 mb-4">Try a different search term</p>
-          <button className="btn-secondary text-[12px]" onClick={() => setSearch('')}>Clear search</button>
+          <p className="text-[13px] font-medium text-text-secondary">Nenhum resultado para "{search}"</p>
+          <p className="text-[11px] text-text-muted mt-1 mb-4">Tente um termo de busca diferente</p>
+          <button className="btn-secondary text-[12px]" onClick={() => setSearch('')}>Limpar busca</button>
         </div>
       )}
 
@@ -130,7 +117,7 @@ export default function Products() {
         <ProductsTable 
           products={filtered} 
           loading={loading} 
-          onRefresh={fetchProducts} 
+          onRefresh={refetch} 
           onAdd={() => navigate('/create-product')}
         />
       )}

@@ -23,7 +23,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.email || !form.password) { setError('Please fill in all fields.'); return }
+    if (!form.email || !form.password) { setError('Por favor, preencha todos os campos.'); return }
     setLoading(true); setError('')
     try {
       const { data } = await authService.login({
@@ -36,7 +36,7 @@ export default function Login() {
       saveSession(token, user)
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      setError(getErrorMessage(err, 'Invalid credentials.'))
+      setError(getErrorMessage(err, 'Credenciais inválidas.'))
     } finally {
       setLoading(false)
     }
@@ -54,22 +54,22 @@ export default function Login() {
 
       {/* Glow orb */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(109,106,254,0.07) 0%, transparent 65%)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgba(95,127,110,0.07) 0%, transparent 65%)' }} />
 
       <div className="relative w-full max-w-[340px] animate-fade-up">
 
         {/* Brand */}
         <div className="flex flex-col items-center mb-8">
           <div className="logo-glow w-[38px] h-[38px] rounded-[11px] flex items-center justify-center mb-4 cursor-default"
-            style={{ background: 'linear-gradient(135deg, #6d6afe 0%, #9b8fff 100%)', boxShadow: '0 4px 16px rgba(109,106,254,0.4), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
+            style={{ background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)', boxShadow: '0 4px 16px rgba(95,127,110,0.4), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
           </div>
-          <h1 className="text-[17px] font-semibold text-text-primary tracking-[-0.025em]">StockWise</h1>
-          <p className="text-[12px] text-text-tertiary mt-1 tracking-[-0.005em]">Sign in to your workspace</p>
+          <h1 className="text-[17px] font-semibold text-text-primary tracking-[-0.025em]">EstoqueWise</h1>
+          <p className="text-[12px] text-text-tertiary mt-1 tracking-[-0.005em]">Entre na sua área de trabalho</p>
         </div>
 
         {/* Card */}
@@ -102,7 +102,7 @@ export default function Login() {
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-medium text-text-tertiary tracking-[-0.005em]" htmlFor="email">
-                Email
+                E-mail
               </label>
               <div className="relative">
                 <input
@@ -110,7 +110,7 @@ export default function Login() {
                   onChange={handleChange}
                   onFocus={() => setFieldFocus('email')}
                   onBlur={() => setFieldFocus('')}
-                  placeholder="you@company.com"
+                  placeholder="voce@empresa.com"
                   className="input-field"
                   autoComplete="email" autoFocus
                 />
@@ -124,7 +124,7 @@ export default function Login() {
             {/* Password */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-medium text-text-tertiary tracking-[-0.005em]" htmlFor="password">
-                Password
+                Senha
               </label>
               <input
                 id="password" type="password" name="password" value={form.password}
@@ -141,8 +141,8 @@ export default function Login() {
             <div className="pt-0.5">
               <button type="submit" disabled={loading} className="btn-primary w-full" style={{ height: '36px' }}>
                 {loading
-                  ? <><span className="w-3.5 h-3.5 spinner" /> Signing in…</>
-                  : 'Sign in →'
+                  ? <><span className="w-3.5 h-3.5 spinner" /> Entrando…</>
+                  : 'Entrar →'
                 }
               </button>
             </div>
@@ -151,9 +151,9 @@ export default function Login() {
           {/* Register Link */}
           <div className="mt-5 text-center">
             <p className="text-[12px] text-text-tertiary">
-              Don't have an account?{' '}
+              Não tem uma conta?{' '}
               <a href="/register" className="text-accent hover:text-accent-hover transition-colors font-medium">
-                Create one
+                Criar conta
               </a>
             </p>
           </div>
@@ -161,7 +161,7 @@ export default function Login() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-text-muted mt-5 tracking-[-0.005em]">
-          Secure · Encrypted · Private
+          Seguro · Criptografado · Privado
         </p>
       </div>
     </div>

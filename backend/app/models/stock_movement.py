@@ -1,12 +1,16 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
-from app.database import Base
-from datetime import datetime
 import enum
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
+from app.database import Base
+
 
 class MovementType(enum.Enum):
     entrada = "entrada"
     saida = "saida"
+
 
 class StockMovement(Base):
     __tablename__ = "stock_movements"
@@ -17,7 +21,7 @@ class StockMovement(Base):
     quantity = Column(Float, nullable=False)
     reason = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     product = relationship("Product", back_populates="movements")
     owner = relationship("User")
