@@ -20,7 +20,15 @@ export default {
         border: 'var(--color-border)',
         'border-subtle': 'var(--color-border-subtle)',
         'border-strong': 'var(--color-border-strong)',
-        accent: { DEFAULT:'#6d6afe', light:'#8f8dff', dim:'rgba(109,106,254,0.12)', glow:'rgba(109,106,254,0.3)' },
+        brand: {
+          400: '#88a696', // Focus rings, soft borders
+          500: '#6b8f7a', // Lighter accents
+          600: '#5f7f6e', // Primary Accent
+          700: '#4f6f5f', // Hover states
+          800: '#3e5b4d', // Active states 
+          900: '#2c4337', // Dark mode contrast
+        },
+        accent: { DEFAULT:'#5f7f6e', light:'#6b8f7a', dim:'rgba(95,127,110,0.12)', glow:'rgba(95,127,110,0.3)' },
         text: {
           primary: 'var(--color-text-primary)',
           secondary: 'var(--color-text-secondary)',

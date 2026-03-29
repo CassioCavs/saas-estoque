@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "../components/Layout";
 import { stockService, getErrorMessage } from "../services/api";
+import { formatDateBR, formatNumberBR } from "../utils/format";
 
 const movementConfig = {
   entrada: {
@@ -27,7 +28,7 @@ export default function History() {
       const { data } = await stockService.getHistory();
       setHistory(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(getErrorMessage(err, "Failed to load stock history."));
+      setError(getErrorMessage(err, "Falha ao carregar histórico de estoque."));
     } finally {
       setLoading(false);
     }
@@ -39,8 +40,8 @@ export default function History() {
 
   return (
     <Layout
-      title="Stock History"
-      subtitle="Track inventory movements in real time"
+      title="Histórico de Estoque"
+      subtitle="Acompanhe as movimentações do inventário em tempo real"
     >
       {loading ? (
         <div className="space-y-3 animate-pulse">
@@ -55,7 +56,7 @@ export default function History() {
       ) : history.length === 0 ? (
         <div className="card py-20 text-center">
           <p className="text-text-muted text-[13px]">
-            No stock movements recorded yet.
+            Nenhuma movimentação de estoque registrada ainda.
           </p>
         </div>
       ) : (
@@ -64,19 +65,19 @@ export default function History() {
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/[0.06]">
                 <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                  Date
+                  Data
                 </th>
                 <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                  Product
+                  Produto
                 </th>
                 <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                  Movement
+                  Movimento
                 </th>
                 <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                  Quantity
+                  Quantidade
                 </th>
                 <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                  Reason
+                  Motivo
                 </th>
               </tr>
             </thead>
@@ -84,7 +85,7 @@ export default function History() {
               {history.map((item) => {
                 const type = movementConfig[item.type] ?? movementConfig.saida;
                 const productName =
-                  item.product?.name || `Product #${item.product_id}`;
+                  item.product?.name || `Produto #${item.product_id}`;
                 const unitType = item.product?.unit_type?.toUpperCase() || "";
 
                 return (
@@ -94,10 +95,7 @@ export default function History() {
                   >
                     <td className="px-5 py-2">
                       <span className="text-[12px] text-text-muted font-mono">
-                        {new Date(item.created_at).toLocaleString([], {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
+                        {formatDateBR(item.created_at)}
                       </span>
                     </td>
                     <td className="px-5 py-2">
@@ -117,12 +115,12 @@ export default function History() {
                         className={`text-[12px] font-mono ${item.type === "entrada" ? "text-success" : "text-danger"}`}
                       >
                         {type.sign}
-                        {Number(item.quantity).toFixed(2)} {unitType}
+                        {formatNumberBR(item.quantity)} {unitType}
                       </span>
                     </td>
                     <td className="px-5 py-2 max-w-[320px] truncate">
                       <span className="text-[12px] text-text-tertiary">
-                        {item.reason || "No reason provided"}
+                        {item.reason || "Sem motivo informado"}
                       </span>
                     </td>
                   </tr>

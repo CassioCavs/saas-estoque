@@ -24,11 +24,11 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!formData.name || !formData.email || !formData.password) {
-      setError('Please fill in all fields.')
+      setError('Por favor, preencha todos os campos.')
       return
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters.')
+      setError('A senha deve ter pelo menos 8 caracteres.')
       return
     }
 
@@ -38,10 +38,10 @@ export default function Register() {
     try {
       await authService.register(formData)
       navigate('/login', {
-        state: { message: 'Registration successful! Please log in.' }
+        state: { message: 'Cadastro realizado com sucesso! Faça login.' }
       })
     } catch (err) {
-      setError(getErrorMessage(err, 'Registration failed. Please try again.'))
+      setError(getErrorMessage(err, 'Falha no cadastro. Tente novamente.'))
     } finally {
       setLoading(false)
     }
@@ -59,7 +59,7 @@ export default function Register() {
 
       {/* Glow orb */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(109,106,254,0.06) 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(95,127,110,0.06) 0%, transparent 70%)' }} />
 
       <div className="w-full max-w-sm animate-fade-up">
 
@@ -72,8 +72,8 @@ export default function Register() {
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-text-primary tracking-tight">Create Account</h1>
-          <p className="text-sm text-text-muted mt-1">Join our inventory management platform</p>
+          <h1 className="text-xl font-semibold text-text-primary tracking-tight">Criar Conta</h1>
+          <p className="text-sm text-text-muted mt-1">Junte-se à nossa plataforma de gestão de estoque</p>
         </div>
 
         {/* Card */}
@@ -96,7 +96,7 @@ export default function Register() {
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-text-primary mb-1.5">
-                Full Name
+                Nome Completo
               </label>
               <input
                 id="name"
@@ -108,10 +108,10 @@ export default function Register() {
                 onFocus={() => setFieldFocus('name')}
                 onBlur={() => setFieldFocus('')}
                 className="input-field"
-                placeholder="Enter your full name"
+                placeholder="Digite seu nome completo"
                 style={{
-                  borderColor: fieldFocus === 'name' ? 'rgba(109,106,254,0.5)' : undefined,
-                  boxShadow: fieldFocus === 'name' ? '0 0 0 3px rgba(109,106,254,0.1)' : undefined,
+                  borderColor: fieldFocus === 'name' ? 'rgba(95,127,110,0.5)' : undefined,
+                  boxShadow: fieldFocus === 'name' ? '0 0 0 3px rgba(95,127,110,0.1)' : undefined,
                 }}
               />
             </div>
@@ -119,7 +119,7 @@ export default function Register() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-1.5">
-                Email Address
+                Endereço de E-mail
               </label>
               <input
                 id="email"
@@ -131,10 +131,10 @@ export default function Register() {
                 onFocus={() => setFieldFocus('email')}
                 onBlur={() => setFieldFocus('')}
                 className="input-field"
-                placeholder="Enter your email"
+                placeholder="Digite seu e-mail"
                 style={{
-                  borderColor: fieldFocus === 'email' ? 'rgba(109,106,254,0.5)' : undefined,
-                  boxShadow: fieldFocus === 'email' ? '0 0 0 3px rgba(109,106,254,0.1)' : undefined,
+                  borderColor: fieldFocus === 'email' ? 'rgba(95,127,110,0.5)' : undefined,
+                  boxShadow: fieldFocus === 'email' ? '0 0 0 3px rgba(95,127,110,0.1)' : undefined,
                 }}
               />
             </div>
@@ -142,7 +142,7 @@ export default function Register() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-1.5">
-                Password
+                Senha
               </label>
               <input
                 id="password"
@@ -155,10 +155,10 @@ export default function Register() {
                 onFocus={() => setFieldFocus('password')}
                 onBlur={() => setFieldFocus('')}
                 className="input-field"
-                placeholder="Create a password (min. 8 characters)"
+                placeholder="Crie uma senha (mín. 8 caracteres)"
                 style={{
-                  borderColor: fieldFocus === 'password' ? 'rgba(109,106,254,0.5)' : undefined,
-                  boxShadow: fieldFocus === 'password' ? '0 0 0 3px rgba(109,106,254,0.1)' : undefined,
+                  borderColor: fieldFocus === 'password' ? 'rgba(95,127,110,0.5)' : undefined,
+                  boxShadow: fieldFocus === 'password' ? '0 0 0 3px rgba(95,127,110,0.1)' : undefined,
                 }}
               />
             </div>
@@ -173,16 +173,16 @@ export default function Register() {
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>
           </form>
 
           {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-text-muted">
-              Already have an account?{' '}
+              Já tem uma conta?{' '}
               <Link to="/login" className="text-accent hover:text-accent-hover transition-colors font-medium">
-                Sign in
+                Entrar
               </Link>
             </p>
           </div>

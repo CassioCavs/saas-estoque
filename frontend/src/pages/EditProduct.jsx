@@ -18,7 +18,7 @@ export default function EditProduct() {
     setFetchLoading(true)
     productsService.getById(id)
       .then(({ data }) => setProduct(data.product ?? data.data ?? data))
-      .catch(err => setFetchError(getErrorMessage(err, 'Product not found.')))
+      .catch(err => setFetchError(getErrorMessage(err, 'Produto não encontrado.')))
       .finally(() => setFetchLoading(false))
   }, [id])
 
@@ -28,7 +28,7 @@ export default function EditProduct() {
       await productsService.update(id, values)
       navigate('/products', { replace: true })
     } catch (err) {
-      setSaveError(getErrorMessage(err, 'Failed to update.'))
+      setSaveError(getErrorMessage(err, 'Falha ao atualizar.'))
     } finally {
       setSaveLoading(false)
     }
@@ -71,9 +71,9 @@ export default function EditProduct() {
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
         </div>
-        <p className="text-[13px] font-medium text-text-primary mb-1">Product not found</p>
+        <p className="text-[13px] font-medium text-text-primary mb-1">Produto não encontrado</p>
         <p className="text-[12px] text-text-muted mb-5">{fetchError}</p>
-        <button className="btn-secondary" onClick={() => navigate('/products')}>← Back to products</button>
+        <button className="btn-secondary" onClick={() => navigate('/products')}>← Voltar para produtos</button>
       </div>
     )
 
@@ -83,7 +83,7 @@ export default function EditProduct() {
         <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-[9px] flex items-center justify-center text-accent flex-shrink-0"
-              style={{ background: 'rgba(109,106,254,0.1)', border: '1px solid rgba(109,106,254,0.2)' }}>
+              style={{ background: 'rgba(95,127,110,0.1)', border: '1px solid rgba(95,127,110,0.2)' }}>
               <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -91,9 +91,9 @@ export default function EditProduct() {
             </div>
             <div>
               <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.015em]">
-                {product?.name ?? 'Edit product'}
+                {product?.name ?? 'Editar produto'}
               </h2>
-              <p className="text-[11px] text-text-muted mt-px">Update the fields you'd like to change</p>
+              <p className="text-[11px] text-text-muted mt-px">Atualize os campos que deseja alterar</p>
             </div>
           </div>
           <span className="text-[10px] font-mono text-text-muted px-2 py-1 rounded-md"
@@ -127,10 +127,10 @@ export default function EditProduct() {
   }
 
   return (
-    <Layout title="Edit Product" subtitle="Modify an existing product">
+    <Layout title="Editar Produto" subtitle="Modificar um produto existente">
       <div className="max-w-xl">
         <Breadcrumb
-          items={[{ label: 'Products', to: '/products' }, { label: product?.name ?? `#${String(id).padStart(5,'0')}` }]}
+          items={[{ label: 'Produtos', to: '/products' }, { label: product?.name ?? `#${String(id).padStart(5,'0')}` }]}
           navigate={navigate}
         />
         {renderContent()}

@@ -7,8 +7,25 @@ from app.models.stock_movement import StockMovement
 from app.schemas.stock_movement_schema import StockMovementCreate
 
 from .activity_log_service import log_activity
-from .product_service import get_product_by_id
+from app.models.stock_movement import MovementType
 
+def record_stock_movement(
+    db: Session, product_id: int, movement_type: str, quantity: float, reason: str, user_id: int
+) -> StockMovement:
+    """
+    Internal function to record a stock movement ledger entry 
+    without modifying the actual Product.stock. Used by other services.
+    """
+    db_movement = StockMovement(
+        product_id=product_id,
+        type=MovementType(movement_type),
+        quantity=quantity,
+        reason=reason,
+        user_id=user_id
+    )
+    db.add(db_movement)
+    db.flush()
+    return db_movement
 
 def create_stock_movement(
     db: Session, movement: StockMovementCreate, user_id: int
@@ -16,6 +33,7 @@ def create_stock_movement(
     """
     Cria movimentação de estoque e atualiza o estoque do produto.
     """
+    from .product_service import get_product_by_id
     product = get_product_by_id(db, int(movement.product_id), int(user_id))
     movement_type = movement.type.value
     movement_quantity = float(movement.quantity)

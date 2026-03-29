@@ -138,14 +138,14 @@ const LogoutIcon = () => (
 );
 
 const navLinks = [
-  { to: "/sales", label: "Sales", icon: CartIcon },
-  { to: "/dashboard", label: "Dashboard", icon: GridIcon },
-  { to: "/products", label: "Products", icon: BoxIcon },
-  { to: "/categories", label: "Categories", icon: TagIcon },
-  { to: "/customers", label: "Customers", icon: UsersIcon },
-  { to: "/reports", label: "Analytics", icon: ChartIcon },
-  { to: "/history", label: "History", icon: HistoryIcon },
-  { to: "/alerts", label: "Alerts", icon: AlertIcon },
+  { to: "/sales", label: "Vendas", icon: CartIcon },
+  { to: "/dashboard", label: "Painel", icon: GridIcon },
+  { to: "/products", label: "Produtos", icon: BoxIcon },
+  { to: "/categories", label: "Categorias", icon: TagIcon },
+  { to: "/customers", label: "Clientes", icon: UsersIcon },
+  { to: "/reports", label: "Relatórios", icon: ChartIcon },
+  { to: "/history", label: "Histórico", icon: HistoryIcon },
+  { to: "/alerts", label: "Alertas", icon: AlertIcon },
 ];
 
 export default function Sidebar() {
@@ -182,9 +182,9 @@ export default function Sidebar() {
           <div
             className="logo-glow relative flex-shrink-0 w-[28px] h-[28px] rounded-[8px] flex items-center justify-center"
             style={{
-              background: "linear-gradient(135deg, #6d6afe 0%, #9b8fff 100%)",
+              background: "linear-gradient(135deg, #15803d 0%, #16a34a 100%)",
               boxShadow:
-                "0 2px 8px rgba(109,106,254,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                "0 2px 8px rgba(21,128,61,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
             }}
           >
             <svg
@@ -202,7 +202,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-semibold text-text-primary tracking-[-0.02em]">
-              StockWise
+              EstoqueWise
             </span>
           </div>
           <span
@@ -220,7 +220,7 @@ export default function Sidebar() {
       {/* ── Nav ── */}
       <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto custom-scrollbar">
         <p className="px-2.5 pt-0.5 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted select-none">
-          Navigation
+          Navegação
         </p>
         {navLinks.map(({ to, label, icon: Icon }) => (
           <NavLink
@@ -260,25 +260,25 @@ export default function Sidebar() {
           <div
             className="w-[26px] h-[26px] rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-semibold text-accent"
             style={{
-              background: "rgba(109,106,254,0.13)",
-              border: "1px solid rgba(109,106,254,0.22)",
+              background: "rgba(21,128,61,0.13)",
+              border: "1px solid rgba(21,128,61,0.22)",
             }}
           >
             {initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-semibold text-text-primary truncate">
-              {user?.name || "User"}
+              {user?.name || "Usuário"}
             </p>
             <p className="text-[10px] text-text-muted truncate opacity-60">
-              Admin
+              Administrador
             </p>
           </div>
           <button
             onClick={handleLogout}
             className="w-7 h-7 rounded-md flex items-center justify-center text-text-tertiary hover:text-danger hover:bg-danger/10 transition-all"
-            title="Logout"
-            aria-label="Logout"
+            title="Sair"
+            aria-label="Sair"
           >
             <LogoutIcon />
           </button>

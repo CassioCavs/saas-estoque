@@ -1,36 +1,27 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import ProductsTable from '../components/ProductsTable'
-import { categoriesService, getErrorMessage } from '../services/api'
+import { categoriesService } from '../services/api'
+import { useFetch, useDebounce } from '../hooks/useFetch'
 
 export default function CategoryProducts() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [products, setProducts] = useState([])
-  const [category, setCategory] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
   const [spinning, setSpinning] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true); setError('')
-    try {
-      const [catRes, prodRes] = await Promise.all([
-        categoriesService.getById(id),
-        categoriesService.getProducts(id)
-      ])
-      setCategory(catRes.data)
-      setProducts(prodRes.data)
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load category products.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
+  const fetchCategoryData = useCallback(() => Promise.all([
+    categoriesService.getById(id),
+    categoriesService.getProducts(id)
+  ]).then(([catRes, prodRes]) => ({
+    data: { category: catRes.data, products: prodRes.data }
+  })), [id])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  const { data, loading, error, refetch: fetchData } = useFetch(fetchCategoryData)
+  const category = data?.category || null
+  const products = data?.products || []
 
   const handleRefresh = async () => {
     setSpinning(true)
@@ -38,14 +29,14 @@ export default function CategoryProducts() {
     setTimeout(() => setSpinning(false), 400)
   }
 
-  const filtered = search.trim()
-    ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = debouncedSearch.trim()
+    ? products.filter(p => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
     : products
 
   return (
     <Layout 
-      title={category ? `Category: ${category.name}` : 'Category Products'} 
-      subtitle={category?.description || 'View products in this category'}
+      title={category ? `Categoria: ${category.name}` : 'Produtos da Categoria'} 
+      subtitle={category?.description || 'Veja os produtos desta categoria'}
     >
       <div className="flex items-center gap-2.5 mb-5">
         <button 
@@ -55,7 +46,7 @@ export default function CategoryProducts() {
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          Back
+          Voltar
         </button>
 
         <div className="h-4 w-[1px] bg-white/10 mx-1" />
@@ -68,7 +59,7 @@ export default function CategoryProducts() {
           </svg>
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search in category…"
+            placeholder="Buscar na categoria…"
             className="input-field pl-8 pr-8"
           />
           {search && (
@@ -93,7 +84,7 @@ export default function CategoryProducts() {
         )}
 
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={handleRefresh} disabled={loading} className="btn-secondary" title="Refresh">
+          <button onClick={handleRefresh} disabled={loading} className="btn-secondary" title="Atualizar">
             <svg
               width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
               style={{ transition: 'transform 0.5s', transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)' }}
@@ -101,14 +92,14 @@ export default function CategoryProducts() {
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
-            Refresh
+            Atualizar
           </button>
 
           <button className="btn-primary" onClick={() => navigate('/create-product')}>
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Add Product
+            Novo Produto
           </button>
         </div>
       </div>

@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from fastapi import HTTPException
 from app.models.product import Product
 from app.schemas.product_schema import ProductCreate, ProductUpdate
 from .activity_log_service import log_activity
+from .stock_service import record_stock_movement
 
 def calculate_prices(data: dict) -> dict:
     cost = data.get("cost_price") or 0.0
@@ -35,6 +36,17 @@ def create_product(db: Session, product: ProductCreate, user_id: int) -> Product
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
+    
+    if db_product.stock > 0:
+        record_stock_movement(
+            db=db,
+            product_id=db_product.id,
+            movement_type="entrada",
+            quantity=db_product.stock,
+            reason="Estoque inicial",
+            user_id=user_id
+        )
+        
     log_activity(db, user_id, "create_product", "product", db_product.id)
     return db_product
 
@@ -68,6 +80,9 @@ def get_products(
 
     if max_price is not None:
         query = query.filter(Product.price <= max_price)
+
+    # Use selectinload to eagerly load the category relation
+    query = query.options(selectinload(Product.category_relation))
 
     return query.order_by(Product.created_at.desc()).offset(skip).limit(limit).all()
 
@@ -106,11 +121,19 @@ def update_product(db: Session, product_id: int, product_update: ProductUpdate, 
             update_data["profit_margin"] = round(new_margin, 2)
         update_data["price"] = sale
 
+    old_stock = product.stock
+
     for key, value in update_data.items():
         setattr(product, key, value)
         
     db.commit()
     db.refresh(product)
+    
+    if product.stock > old_stock:
+        record_stock_movement(db, product.id, "entrada", product.stock - old_stock, "Ajuste manual", user_id)
+    elif product.stock < old_stock:
+        record_stock_movement(db, product.id, "saida", old_stock - product.stock, "Ajuste manual", user_id)
+        
     log_activity(db, user_id, "update_product", "product", product_id)
     return product
 

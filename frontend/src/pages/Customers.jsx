@@ -1,31 +1,18 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import Layout from '../components/Layout'
 import { customersService, getErrorMessage } from '../services/api'
+import { useFetch, useDebounce } from '../hooks/useFetch'
 
 export default function Customers() {
-  const [customers, setCustomers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState(null)
   const [form, setForm] = useState({ name: '', email: '', phone: '', observations: '' })
   const [saveLoading, setSaveLoading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
 
-  const fetchCustomers = useCallback(async () => {
-    setLoading(true); setError('')
-    try {
-      const { data } = await customersService.getAll()
-      setCustomers(data)
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load customers.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchCustomers() }, [fetchCustomers])
+  const { data: customers, loading, error, refetch: fetchCustomers } = useFetch(customersService.getAll)
 
   const handleOpenModal = (customer = null) => {
     setEditingCustomer(customer)
@@ -51,7 +38,7 @@ export default function Customers() {
       setModalOpen(false)
       fetchCustomers()
     } catch (err) {
-      alert(getErrorMessage(err, 'Failed to save customer.'))
+      alert(getErrorMessage(err, 'Falha ao salvar cliente.'))
     } finally {
       setSaveLoading(false)
     }
@@ -64,17 +51,17 @@ export default function Customers() {
       setDeleteTarget(null)
       fetchCustomers()
     } catch (err) {
-      alert(getErrorMessage(err, 'Failed to delete customer.'))
+      alert(getErrorMessage(err, 'Falha ao excluir cliente.'))
     }
   }
 
   const filtered = customers.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
-    (c.email && c.email.toLowerCase().includes(search.toLowerCase()))
+    c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+    (c.email && c.email.toLowerCase().includes(debouncedSearch.toLowerCase()))
   )
 
   return (
-    <Layout title="Customers" subtitle="Manage your client base">
+    <Layout title="Clientes" subtitle="Gerencie sua base de clientes">
       
       {/* ── Toolbar ── */}
       <div className="flex items-center gap-3 mb-6">
@@ -84,7 +71,7 @@ export default function Customers() {
           </svg>
           <input 
             type="text" 
-            placeholder="Search customers..." 
+            placeholder="Buscar clientes..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input-field pl-9"
@@ -94,7 +81,7 @@ export default function Customers() {
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          New Customer
+          Novo Cliente
         </button>
       </div>
 
@@ -107,16 +94,16 @@ export default function Customers() {
         <div className="card p-8 text-center text-danger text-[13px]">{error}</div>
       ) : filtered.length === 0 ? (
         <div className="card py-16 text-center">
-          <p className="text-text-muted text-[13px]">No customers found.</p>
+          <p className="text-text-muted text-[13px]">Nenhum cliente encontrado.</p>
         </div>
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/[0.06]">
-                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Customer</th>
-                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Contact</th>
-                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Cliente</th>
+                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider">Contato</th>
+                <th className="px-5 py-3 text-[11px] font-medium text-text-muted uppercase tracking-wider text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -181,56 +168,56 @@ export default function Customers() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
           <div className="relative card w-full max-w-md p-6 animate-fade-up">
             <h3 className="text-[16px] font-semibold text-text-primary mb-5">
-              {editingCustomer ? 'Edit Customer' : 'New Customer'}
+              {editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-text-tertiary">Full Name</label>
+                <label className="text-[11px] font-medium text-text-tertiary">Nome Completo</label>
                 <input 
                   type="text" 
                   value={form.name} 
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. John Doe"
+                  placeholder="Ex.: João da Silva"
                   className="input-field"
                   autoFocus
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium text-text-tertiary">Email</label>
+                  <label className="text-[11px] font-medium text-text-tertiary">E-mail</label>
                   <input 
                     type="email" 
                     value={form.email} 
                     onChange={e => setForm({ ...form, email: e.target.value })}
-                    placeholder="john@example.com"
+                    placeholder="joao@exemplo.com"
                     className="input-field"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium text-text-tertiary">Phone</label>
+                  <label className="text-[11px] font-medium text-text-tertiary">Telefone</label>
                   <input 
                     type="text" 
                     value={form.phone} 
                     onChange={e => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+55 11 99999-9999"
+                    placeholder="(11) 99999-9999"
                     className="input-field"
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-text-tertiary">Observations</label>
+                <label className="text-[11px] font-medium text-text-tertiary">Observações</label>
                 <textarea 
                   value={form.observations} 
                   onChange={e => setForm({ ...form, observations: e.target.value })}
-                  placeholder="Notes about the customer..."
+                  placeholder="Notas sobre o cliente..."
                   className="input-field min-h-[60px] resize-y"
                 />
               </div>
               <div className="flex gap-2 pt-3">
                 <button type="submit" disabled={saveLoading || !form.name.trim()} className="btn-primary flex-1">
-                  {saveLoading ? 'Saving...' : 'Save Customer'}
+                  {saveLoading ? 'Salvando...' : 'Salvar Cliente'}
                 </button>
-                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button>
               </div>
             </form>
           </div>
@@ -247,11 +234,11 @@ export default function Customers() {
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
               </svg>
             </div>
-            <h3 className="text-[15px] font-semibold text-text-primary mb-2">Delete Customer?</h3>
-            <p className="text-[12px] text-text-muted mb-6">This will remove "{deleteTarget.name}". All sales associated with this client will remain in history.</p>
+            <h3 className="text-[15px] font-semibold text-text-primary mb-2">Excluir Cliente?</h3>
+            <p className="text-[12px] text-text-muted mb-6">Isso removerá "{deleteTarget.name}". Todas as vendas associadas a este cliente permanecerão no histórico.</p>
             <div className="flex gap-2">
-              <button className="btn-primary bg-danger hover:bg-danger/90 flex-1 border-none" onClick={handleDelete}>Delete</button>
-              <button className="btn-secondary flex-1" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button className="btn-primary bg-danger hover:bg-danger/90 flex-1 border-none" onClick={handleDelete}>Excluir</button>
+              <button className="btn-secondary flex-1" onClick={() => setDeleteTarget(null)}>Cancelar</button>
             </div>
           </div>
         </div>

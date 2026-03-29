@@ -7,6 +7,7 @@ import {
   getErrorMessage,
 } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
+import { formatBRL } from "../utils/format";
 
 /* ── Stat card ─────────────────────────────────────────────────────── */
 function StatCard({ label, value, sub, accent, icon, loading, delay = 0 }) {
@@ -82,8 +83,8 @@ function QuickAction({ label, desc, onClick, icon, delay = 0 }) {
         <div
           className="w-8 h-8 rounded-[9px] flex items-center justify-center text-accent flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
           style={{
-            background: "rgba(109,106,254,0.1)",
-            border: "1px solid rgba(109,106,254,0.2)",
+            background: "rgba(95,127,110,0.1)",
+            border: "1px solid rgba(95,127,110,0.2)",
           }}
         >
           {icon}
@@ -134,8 +135,8 @@ function RecentRow({ product, index, onClick }) {
       <div
         className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center mr-3 flex-shrink-0"
         style={{
-          background: "rgba(109,106,254,0.09)",
-          border: "1px solid rgba(109,106,254,0.16)",
+          background: "rgba(95,127,110,0.09)",
+          border: "1px solid rgba(95,127,110,0.16)",
         }}
       >
         <span className="text-[9px] font-mono text-accent font-medium">
@@ -149,7 +150,7 @@ function RecentRow({ product, index, onClick }) {
 
       <div className="flex items-center gap-3 ml-3 flex-shrink-0">
         <span className="text-[12px] font-mono text-text-muted tabular-nums">
-          ${Number(product.price).toFixed(2)}
+          {formatBRL(product.price)}
         </span>
         <span
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -211,7 +212,7 @@ export default function Dashboard() {
             : (rawProducts?.products ?? rawProducts?.data ?? []),
         );
       } catch (err) {
-        setError(getErrorMessage(err, "Failed to load dashboard data."));
+        setError(getErrorMessage(err, "Falha ao carregar dados do painel."));
       } finally {
         setLoading(false);
       }
@@ -226,11 +227,11 @@ export default function Dashboard() {
 
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = user?.name?.split(" ")[0] ?? "there";
+    hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const firstName = user?.name?.split(" ")[0] ?? "usuário";
 
   return (
-    <Layout title="Dashboard" subtitle="Inventory overview">
+    <Layout title="Painel" subtitle="Visão geral do estoque">
       {/* ── Welcome ── */}
       <div className="flex items-start justify-between mb-7">
         <div>
@@ -239,8 +240,8 @@ export default function Dashboard() {
           </h2>
           <p className="text-[12px] text-text-tertiary mt-1">
             {loading
-              ? "Loading your inventory…"
-              : `${summary.total_products || 0} products tracked · last synced just now`}
+              ? "Carregando seu inventário…"
+              : `${summary.total_products || 0} produtos monitorados · atualizado agora`}
           </p>
         </div>
         <button
@@ -258,7 +259,7 @@ export default function Dashboard() {
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Add Product
+          Novo Produto
         </button>
       </div>
 
@@ -269,10 +270,10 @@ export default function Dashboard() {
       {/* ── Stats ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
         <StatCard
-          label="Total Products"
+          label="Total de Produtos"
           value={summary.total_products || 0}
-          sub="unique SKUs"
-          accent="#6d6afe"
+          sub="SKUs únicos"
+          accent="#15803d"
           loading={loading}
           delay={0}
           icon={
@@ -290,9 +291,9 @@ export default function Dashboard() {
         />
 
         <StatCard
-          label="Portfolio Value"
-          value={`$${Number(summary.total_stock_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          sub="total worth"
+          label="Valor do Estoque"
+          value={formatBRL(summary.total_stock_value || 0)}
+          sub="valor total"
           accent="#22c55e"
           loading={loading}
           delay={50}
@@ -312,9 +313,9 @@ export default function Dashboard() {
         />
 
         <StatCard
-          label="Needs Attention"
+          label="Requer Atenção"
           value={summary.low_stock_products || 0}
-          sub="at or below min stock"
+          sub="no ou abaixo do estoque mínimo"
           accent="#f59e0b"
           loading={loading}
           delay={100}
@@ -335,9 +336,9 @@ export default function Dashboard() {
         />
 
         <StatCard
-          label="Movements Today"
+          label="Movimentações Hoje"
           value={summary.total_movements_today || 0}
-          sub={`avg price: $${avgPrice.toFixed(2)}`}
+          sub={`preço médio: ${formatBRL(avgPrice)}`}
           accent="#a78bfa"
           loading={loading}
           delay={150}
@@ -360,11 +361,11 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Quick actions */}
         <div>
-          <SectionLabel>Quick actions</SectionLabel>
+          <SectionLabel>Ações rápidas</SectionLabel>
           <div className="space-y-2">
             <QuickAction
-              label="Add new product"
-              desc="Create an inventory entry"
+              label="Adicionar produto"
+              desc="Criar um item no inventário"
               onClick={() => navigate("/create-product")}
               delay={0}
               icon={
@@ -382,8 +383,8 @@ export default function Dashboard() {
               }
             />
             <QuickAction
-              label="Browse inventory"
-              desc={`${products.length} product${products.length !== 1 ? "s" : ""} in stock`}
+              label="Ver inventário"
+              desc={`${products.length} produto${products.length !== 1 ? "s" : ""} em estoque`}
               onClick={() => navigate("/products")}
               delay={60}
               icon={
@@ -409,7 +410,7 @@ export default function Dashboard() {
 
         {/* Recent products */}
         <div className="lg:col-span-2">
-          <SectionLabel>Recent products</SectionLabel>
+          <SectionLabel>Produtos recentes</SectionLabel>
           <div className="card overflow-hidden">
             {loading ? (
               <div className="p-4 space-y-3">
@@ -427,7 +428,7 @@ export default function Dashboard() {
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center py-10 text-center px-4">
                 <span className="text-[12px] text-text-muted">
-                  No products to display
+                  Nenhum produto para exibir
                 </span>
               </div>
             ) : (
@@ -449,7 +450,7 @@ export default function Dashboard() {
                       background: "var(--color-badge-bg)",
                     }}
                   >
-                    View all {products.length} products
+                    Ver todos os {products.length} produtos
                     <svg
                       width="10"
                       height="10"
