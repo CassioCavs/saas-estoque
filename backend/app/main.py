@@ -61,16 +61,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
-app.include_router(products_router, prefix="/products", tags=["products"])
-app.include_router(categories_router, prefix="/categories", tags=["categories"])
-app.include_router(customers_router, prefix="/customers", tags=["customers"])
-app.include_router(stock_router, prefix="/stock", tags=["stock"])
-app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
-app.include_router(alerts_router, prefix="/alerts", tags=["alerts"])
-app.include_router(sales_router, prefix="/sales", tags=["sales"])
-app.include_router(reports_router, prefix="/reports", tags=["reports"])
-app.include_router(history_router, prefix="/history", tags=["history"])
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(products_router, prefix="/api/products", tags=["products"])
+app.include_router(categories_router, prefix="/api/categories", tags=["categories"])
+app.include_router(customers_router, prefix="/api/customers", tags=["customers"])
+app.include_router(stock_router, prefix="/api/stock", tags=["stock"])
+app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
+app.include_router(alerts_router, prefix="/api/alerts", tags=["alerts"])
+app.include_router(sales_router, prefix="/api/sales", tags=["sales"])
+app.include_router(reports_router, prefix="/api/reports", tags=["reports"])
+app.include_router(history_router, prefix="/api/history", tags=["history"])
 
 
 @app.get("/")
